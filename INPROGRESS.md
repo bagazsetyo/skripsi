@@ -143,7 +143,7 @@ Output selesai:
 - ada data kuantitatif untuk Bab 4 dan detail model
 
 ### Step 11 — Baru mulai scaffold frontend
-Status: `next`
+Status: `done`
 
 Target:
 - buat folder `frontend`
@@ -160,7 +160,7 @@ Kenapa belum dikerjakan sekarang:
 - lebih efisien bila kontrak API inti sudah terbentuk dulu
 
 ### Step 12 — Implement halaman Dataset dulu
-Status: `pending`
+Status: `next`
 
 Target:
 - tampilkan daftar kelas
@@ -214,9 +214,9 @@ Output selesai:
 
 Kalau ingin paling aman dan paling efisien, mulai dari tiga task ini dulu:
 
-1. Step 11 — Baru mulai scaffold frontend
-2. Step 12 — Implement halaman Dataset dulu
-3. Step 13 — Implement halaman Training & Model
+1. Step 12 — Implement halaman Dataset dulu
+2. Step 13 — Implement halaman Training & Model
+3. Step 14 — Implement halaman Prediksi
 
 Alasannya:
 - kecil
