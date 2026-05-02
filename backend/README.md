@@ -5,7 +5,8 @@ This backend provides:
 - FastAPI inference endpoint `/predict`
 
 ## Classes
-Active classes are defined in `backend/config.py` under `CLASS_NAMES` and can be extended.
+Active classes are defined in `backend/config.py` under `CLASS_NAMES`.
+Current repo configuration uses the full 21 traffic sign classes from the dataset.
 
 ## Train (GPU)
 Build the Docker image from repo root:
@@ -40,6 +41,7 @@ docker run --rm --gpus all -p 8000:8000 \
 ```
 
 You can adjust the score threshold with `SCORE_THRESHOLD` (default 0.5).
+Data and model paths can also be overridden with `DATA_ROOT` and `MODELS_ROOT`.
 
 ### Predict
 Example request:

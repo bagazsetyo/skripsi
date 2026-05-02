@@ -7,8 +7,10 @@ services:
       - "8000:8000"
     volumes:
       - ./data:/app/data
-      - ./backend/models:/app/backend/modelsz
+      - ./backend/models:/app/backend/models
     environment:
+      DATA_ROOT: "/app/data"
+      MODELS_ROOT: "/app/backend/models"
       SCORE_THRESHOLD: "0.5"
     gpus: all
 
@@ -20,5 +22,8 @@ services:
     volumes:
       - ./data:/app/data
       - ./backend/models:/app/backend/models
+    environment:
+      DATA_ROOT: "/app/data"
+      MODELS_ROOT: "/app/backend/models"
     gpus: all
     profiles: ["train"]
