@@ -4,50 +4,11 @@ import time
 
 import torch
 from torch.utils.data import DataLoader
-from transformers import YolosForObjectDetection, YolosImageProcessor
+from transformers import YolosImageProcessor
 
 from config import CLASS_NAMES, DATA_DIR, MODEL_DIR
 from dataset import TrafficSignDataset, collate_fn
-
-
-def build_model(model_name: str, class_names):
-    # Keep model label order aligned with the single class registry in config.py.
-    id2label = {idx: name for idx, name in enumerate(class_names)}
-    label2id = {name: idx for idx, name in enumerate(class_names)}
-    return YolosForObjectDetection.from_pretrained(
-        model_name,
-        num_labels=len(class_names),
-        id2label=id2label,
-        label2id=label2id,
-        ignore_mismatched_sizes=True,
-    )
-
-
-def train_one_epoch(model, processor, optimizer, loader, device, scaler=None, amp=False):
-    model.train()
-    running_loss = 0.0
-    for images, targets in loader:
-        encoding = processor(images=images, annotations=targets, return_tensors="pt")
-        pixel_values = encoding["pixel_values"].to(device)
-        labels = [
-            {k: v.to(device) for k, v in label.items()} for label in encoding["labels"]
-        ]
-
-        optimizer.zero_grad()
-        with torch.cuda.amp.autocast(enabled=amp):
-            outputs = model(pixel_values=pixel_values, labels=labels)
-            loss = outputs.loss
-        if amp and scaler is not None:
-            scaler.scale(loss).backward()
-            scaler.step(optimizer)
-            scaler.update()
-        else:
-            loss.backward()
-            optimizer.step()
-
-        running_loss += loss.item()
-
-    return running_loss / max(len(loader), 1)
+from training_core import build_model, train_one_epoch
 
 
 def main():

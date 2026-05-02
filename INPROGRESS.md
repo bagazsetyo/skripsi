@@ -72,7 +72,7 @@ Kenapa ini penting:
 - mengurangi risiko training gagal karena data kotor
 
 ### Step 5 — Buat endpoint dataset
-Status: `next`
+Status: `done`
 
 Target:
 - endpoint summary dataset
@@ -83,7 +83,7 @@ Output selesai:
 - frontend nanti bisa langsung membangun halaman Dataset
 
 ### Step 6 — Siapkan training request berbasis subset kelas
-Status: `pending`
+Status: `done`
 
 Target:
 - desain request training:
@@ -98,7 +98,7 @@ Kenapa ini sebelum frontend:
 - form training di frontend bergantung pada struktur request ini
 
 ### Step 7 — Buat model registry dengan SQLite
-Status: `pending`
+Status: `done`
 
 Target:
 - tabel model
@@ -112,7 +112,7 @@ Kenapa ini sangat penting:
 - ini inti kebutuhan skripsi Anda, bukan hanya sekali train lalu inferensi
 
 ### Step 8 — Hubungkan inference ke model aktif
-Status: `pending`
+Status: `done`
 
 Target:
 - endpoint prediksi membaca model aktif dari registry
@@ -122,7 +122,7 @@ Output selesai:
 - prediksi tidak lagi hardcoded ke satu folder model
 
 ### Step 9 — Refactor training script jadi service
-Status: `pending`
+Status: `done`
 
 Target:
 - `train.py` tidak hanya CLI
@@ -133,7 +133,7 @@ Output selesai:
 - backend siap menerima trigger training dari web
 
 ### Step 10 — Tambahkan hasil evaluasi model
-Status: `pending`
+Status: `done`
 
 Target:
 - evaluasi pada test set
@@ -143,7 +143,7 @@ Output selesai:
 - ada data kuantitatif untuk Bab 4 dan detail model
 
 ### Step 11 — Baru mulai scaffold frontend
-Status: `pending`
+Status: `next`
 
 Target:
 - buat folder `frontend`
@@ -214,9 +214,9 @@ Output selesai:
 
 Kalau ingin paling aman dan paling efisien, mulai dari tiga task ini dulu:
 
-1. Step 5 — Buat endpoint dataset
-2. Step 6 — Siapkan training request berbasis subset kelas
-3. Step 7 — Buat model registry dengan SQLite
+1. Step 11 — Baru mulai scaffold frontend
+2. Step 12 — Implement halaman Dataset dulu
+3. Step 13 — Implement halaman Training & Model
 
 Alasannya:
 - kecil

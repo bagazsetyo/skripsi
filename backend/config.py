@@ -14,6 +14,13 @@ MODELS_ROOT = Path(os.getenv("MODELS_ROOT", PROJECT_ROOT / "models"))
 MODEL_NAME = os.getenv("MODEL_NAME", "yolos")
 MODEL_DIR = MODELS_ROOT / MODEL_NAME
 MODEL_PATH = MODEL_DIR
+REGISTRY_DB_PATH = Path(os.getenv("REGISTRY_DB_PATH", PROJECT_ROOT / "app.db"))
+DEFAULT_TRAIN_MODEL_NAME = os.getenv("DEFAULT_TRAIN_MODEL_NAME", "hustvl/yolos-tiny")
+DEFAULT_IMAGE_SIZE = int(os.getenv("DEFAULT_IMAGE_SIZE", "512"))
+DEFAULT_BATCH_SIZE = int(os.getenv("DEFAULT_BATCH_SIZE", "1"))
+DEFAULT_EPOCHS = int(os.getenv("DEFAULT_EPOCHS", "30"))
+DEFAULT_LEARNING_RATE = float(os.getenv("DEFAULT_LEARNING_RATE", "1e-4"))
+DEFAULT_WEIGHT_DECAY = float(os.getenv("DEFAULT_WEIGHT_DECAY", "1e-4"))
 
 
 @dataclass(frozen=True)

@@ -3,6 +3,8 @@
 This backend provides:
 - Training script for Vision Transformer (YOLOS)
 - FastAPI inference endpoint `/predict`
+- Dataset summary and validation endpoints
+- SQLite-based model registry and training run history
 
 ## Classes
 Active classes are defined in `backend/config.py` under `CLASS_NAMES`.
@@ -42,6 +44,22 @@ docker run --rm --gpus all -p 8000:8000 \
 
 You can adjust the score threshold with `SCORE_THRESHOLD` (default 0.5).
 Data and model paths can also be overridden with `DATA_ROOT` and `MODELS_ROOT`.
+
+### Main endpoints
+
+- `GET /health`
+- `GET /dataset/classes`
+- `GET /dataset/summary`
+- `GET /dataset/validation`
+- `GET /training/config`
+- `POST /training/runs`
+- `GET /training/runs`
+- `GET /training/runs/{id}`
+- `GET /models`
+- `GET /models/active`
+- `POST /models/{id}/activate`
+- `GET /models/{id}/evaluation`
+- `POST /predict`
 
 ### Predict
 Example request:
