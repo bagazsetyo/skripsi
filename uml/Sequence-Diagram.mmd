@@ -1,0 +1,14 @@
+sequenceDiagram
+  actor User
+  participant FE as React UI
+  participant BE as FastAPI
+  participant Model as YOLOS Model
+  participant DB as SQLite
+
+  User->>FE: Upload gambar
+  FE->>BE: POST /predict (image)
+  BE->>Model: Jalankan inferensi
+  Model-->>BE: boxes + scores + labels
+  BE->>DB: Simpan log prediksi (opsional)
+  BE-->>FE: JSON hasil deteksi
+  FE-->>User: Tampilkan bbox + label + confidence

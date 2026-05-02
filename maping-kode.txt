@@ -1,0 +1,107 @@
+untuk maping datanya 
+
+
+#lampu-hijau
+Kode 
+3 0.241071 0.328125 0.089286 0.308036
+3 0.698661 0.354911 0.111607 0.308036
+
+#lampu-kuning
+Kode
+4 0.437500 0.492701 0.177632 0.503650
+
+
+#lampu-merah
+Kode
+5 0.561047 0.502475 0.106589 0.219472
+
+
+#larangan-belok-kanan
+Kode
+6 0.630556 0.224074 0.064815 0.137037
+6 0.618519 0.492593 0.048148 0.103704
+
+
+#larangan-belok-kiri
+Kode
+7 0.491776 0.413725 0.345395 0.450980
+
+
+#larangan-berhenti
+Kode
+0 0.479592 0.646104 0.244898 0.435065
+
+
+#larangan-berjalan-terus-wajib-berhenti-sesaat
+Kode
+8 0.409502 0.334047 0.352941 0.329764
+
+
+#larangan-masuk-bagi-kendaraan-bermotor-dan-tidak-bermotor
+Kode
+1 0.294922 0.362500 0.421094 0.314063
+
+
+#larangan-memutar-balik
+Kode
+9 0.468085 0.420502 0.644377 0.757322
+
+
+#larangan-parkir
+Kode
+2 0.517578 0.366016 0.269531 0.253906
+
+
+#peringatan-alat-pemberi-isyarat-lalu-lintas
+Kode
+10 0.430348 0.509146 0.373134 0.518293
+
+
+#peringatan-banyak-pejalan-kaki-menggunakan-zebra-cross
+Kode
+11 0.474249 0.460699 0.390558 0.458515
+
+
+#peringatan-penegasan-rambu-tambahan
+Kode
+14 0.519608 0.525362 0.411765 0.579710
+
+
+#peringatan-pintu-perlintasan-kereta-api
+Kode
+12 0.507778 0.461440 0.504444 0.655527
+
+
+#peringatan-simpang-tiga-sisi-kiri
+Kode
+13 0.494159 0.419525 0.362150 0.416887
+
+
+#perintah-masuk-jalur-kiri
+Kode
+15 0.445703 0.430078 0.324219 0.289844
+
+
+#perintah-pilihan-memasuki-salah-satu-jalur
+Kode
+16 0.330882 0.362944 0.299020 0.340102
+
+
+#petunjuk-area-parkir
+Kode
+17 0.411435 0.601338 0.186099 0.602294
+
+
+#petunjuk-lokasi-pemberhentian-bus
+Kode
+18 0.454942 0.412186 0.252907 0.394265
+
+
+#petunjuk-lokasi-putar-balik
+Kode
+19 0.337209 0.453074 0.220930 0.517799
+
+
+#petunjuk-penyeberangan-pejalan-kaki
+Kode
+20 0.543814 0.451724 0.221649 0.324138

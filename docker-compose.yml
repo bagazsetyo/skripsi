@@ -1,0 +1,24 @@
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./data:/app/data
+      - ./backend/models:/app/backend/modelsz
+    environment:
+      SCORE_THRESHOLD: "0.5"
+    gpus: all
+
+  train:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    command: ["python", "train.py", "--data-dir", "/app/data/traffic_sign", "--epochs", "30", "--batch-size", "1", "--image-size", "512", "--amp", "--lr-step", "10", "--lr-gamma", "0.5", "--model-name", "hustvl/yolos-tiny"]
+    volumes:
+      - ./data:/app/data
+      - ./backend/models:/app/backend/models
+    gpus: all
+    profiles: ["train"]

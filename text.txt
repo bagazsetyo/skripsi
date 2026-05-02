@@ -1,0 +1,419 @@
+import React, { useState } from 'react';
+import { 
+  LayoutDashboard, 
+  Database, 
+  Play, 
+  Settings,
+  Image as ImageIcon,
+  Zap,
+  Upload,
+  Scan,
+  CheckCircle,
+  XCircle,
+  ToggleRight,
+  ToggleLeft,
+  FileText,
+  AlertCircle
+} from 'lucide-react';
+
+// --- Komponen-komponen UI Sederhana (Wireframe Style) ---
+
+const Card = ({ title, children, className = "" }) => (
+  <div className={`bg-white border-2 border-slate-300 p-4 rounded-lg ${className}`}>
+    <h3 className="font-bold text-slate-700 mb-3 text-sm uppercase tracking-wider border-b border-slate-200 pb-2">
+      {title}
+    </h3>
+    {children}
+  </div>
+);
+
+const MetricBox = ({ label, value, subtext }) => (
+  <div className="bg-slate-50 border border-slate-300 p-3 rounded text-center h-full flex flex-col justify-center">
+    <p className="text-xs text-slate-500 uppercase mb-1">{label}</p>
+    <p className="text-xl font-mono font-bold text-slate-800">{value}</p>
+    {subtext && <p className="text-xs text-slate-400 mt-1">{subtext}</p>}
+  </div>
+);
+
+const Button = ({ label, icon: Icon, primary = false, onClick }) => (
+  <button 
+    onClick={onClick}
+    className={`flex items-center justify-center gap-2 px-4 py-2 rounded border-2 font-medium w-full text-sm transition-colors
+      ${primary 
+        ? 'bg-slate-800 text-white border-slate-800 hover:bg-slate-700' 
+        : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-50'
+      }`}
+  >
+    {Icon && <Icon size={16} />}
+    {label}
+  </button>
+);
+
+// --- Halaman 1: Dashboard ---
+const DashboardPage = () => (
+  <div className="space-y-6">
+    {/* Ringkasan Utama */}
+    <div className="grid grid-cols-1 gap-6">
+      <Card title="Ringkasan Sistem">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="p-3 border-r border-slate-200">
+                <p className="text-sm text-slate-500">Model Aktif</p>
+                <p className="text-lg font-bold text-green-700 flex items-center gap-2">
+                    models-v4
+                    <span className="text-xs font-normal text-slate-400 bg-slate-100 px-1 rounded">yolos-tiny</span>
+                </p>
+            </div>
+            <div className="p-3 border-r border-slate-200">
+                <p className="text-sm text-slate-500">Total Kelas</p>
+                <p className="text-lg font-bold text-slate-800">43 Kelas</p>
+            </div>
+            <div className="p-3 border-r border-slate-200">
+                <p className="text-sm text-slate-500">Data Train / Test</p>
+                <p className="text-lg font-bold text-slate-800">35,200 / 12,500</p>
+            </div>
+            <div className="p-3">
+                 <p className="text-sm text-slate-500">Jumlah Model Tersimpan</p>
+                 <p className="text-lg font-bold text-slate-800">5 Versi</p>
+            </div>
+        </div>
+      </Card>
+    </div>
+
+    {/* Status & Log Terakhir */}
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <Card title="Status Training Terakhir">
+            <div className="flex items-center gap-4 mb-4">
+                <div className="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center text-green-600">
+                    <CheckCircle size={24} />
+                </div>
+                <div>
+                    <p className="font-bold text-lg">Selesai</p>
+                    <p className="text-xs text-slate-500">25 Jan 2026, 14:30 WIB</p>
+                </div>
+            </div>
+            <div className="bg-slate-50 p-3 rounded border border-slate-200">
+                <div className="flex justify-between text-sm mb-1">
+                    <span className="text-slate-600">Training Loss Akhir:</span>
+                    <span className="font-mono font-bold">0.0245</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                    <span className="text-slate-600">Durasi:</span>
+                    <span className="font-mono">4h 12m</span>
+                </div>
+            </div>
+        </Card>
+    </div>
+  </div>
+);
+
+// --- Halaman 2: Training ---
+const TrainingPage = () => (
+  <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 h-full">
+    {/* Kolom Kiri: Konfigurasi */}
+    <div className="lg:col-span-1 space-y-6">
+      <Card title="Konfigurasi Training">
+        <form className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1">Nama Model Output</label>
+            <div className="flex items-center gap-2">
+                <span className="text-xs font-mono text-slate-500 bg-slate-100 p-2 rounded-l border border-r-0 border-slate-300">models-v</span>
+                <input type="number" defaultValue="6" className="w-20 border-2 border-slate-300 p-1.5 rounded-r text-sm focus:border-slate-500 outline-none" />
+            </div>
+          </div>
+          
+          {/* Dataset Selection Simplified */}
+          <div className="bg-slate-50 p-3 rounded border border-slate-200">
+            <label className="block text-xs font-bold text-slate-500 uppercase mb-2">Dataset Source</label>
+            <div className="flex items-center gap-2 mb-2">
+                <Database size={16} className="text-slate-400"/>
+                <span className="text-sm font-mono text-slate-700">traffic_sign (train)</span>
+            </div>
+            <div className="flex items-center gap-2 mt-3 pt-3 border-t border-slate-200">
+                <input type="checkbox" defaultChecked className="w-4 h-4 accent-slate-800" id="use_all" />
+                <label htmlFor="use_all" className="text-sm text-slate-700">Gunakan Semua Kelas</label>
+            </div>
+            <p className="text-[10px] text-slate-400 mt-1 ml-6 leading-tight">
+                *Uncheck jika ingin memilih subset kelas spesifik untuk eksperimen.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">Epochs</label>
+              <input type="number" defaultValue="100" className="w-full border-2 border-slate-300 p-2 rounded text-sm focus:border-slate-500 outline-none" />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">Batch Size</label>
+              <input type="number" defaultValue="32" className="w-full border-2 border-slate-300 p-2 rounded text-sm focus:border-slate-500 outline-none" />
+            </div>
+          </div>
+        </form>
+      </Card>
+
+      <Card title="Kontrol & Status">
+        <div className="space-y-4">
+            <div className="flex items-center justify-between bg-slate-100 p-2 rounded text-sm">
+                <span className="text-slate-600">Status:</span>
+                <span className="font-bold text-slate-800">Idle</span>
+            </div>
+            <Button label="Mulai Training" icon={Play} primary />
+            <div className="text-xs text-slate-400 text-center">
+                Log akan muncul di terminal/console
+            </div>
+        </div>
+      </Card>
+    </div>
+
+    {/* Kolom Kanan: Tabel Riwayat */}
+    <div className="lg:col-span-2">
+      <Card title="Riwayat Model (Training History)" className="h-full">
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm text-left">
+            <thead className="bg-slate-100 border-b-2 border-slate-300 text-slate-600 uppercase text-xs">
+              <tr>
+                <th className="p-3">Version</th>
+                <th className="p-3">Created At</th>
+                <th className="p-3">Path</th>
+                <th className="p-3">Status</th>
+                <th className="p-3 text-center">Active</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-200">
+              {[1, 2, 3, 4, 5].map((i) => (
+                <tr key={i} className="hover:bg-slate-50">
+                  <td className="p-3 font-bold text-slate-700">models-v{i}</td>
+                  <td className="p-3 text-slate-500">2026-01-2{i}</td>
+                  <td className="p-3 font-mono text-xs text-slate-500">/models/v{i}.pt</td>
+                  <td className="p-3">
+                    <span className={`text-xs px-2 py-1 rounded border ${
+                      i === 5 ? 'bg-yellow-50 border-yellow-200 text-yellow-800' : 'bg-green-50 border-green-200 text-green-800'
+                    }`}>
+                      {i === 5 ? 'Running' : 'Success'}
+                    </span>
+                  </td>
+                  <td className="p-3 text-center">
+                    {i === 4 ? (
+                      <ToggleRight size={24} className="text-green-600 mx-auto cursor-pointer" />
+                    ) : (
+                      <ToggleLeft size={24} className="text-slate-300 mx-auto cursor-pointer" />
+                    )}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </Card>
+    </div>
+  </div>
+);
+
+// --- Halaman 3: Dataset ---
+const DatasetPage = () => (
+  <div className="space-y-6">
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="md:col-span-2">
+            <Card title="Informasi Dataset">
+                <div className="grid grid-cols-2 gap-4 mb-4">
+                    <div className="flex items-start gap-3">
+                        <FileText className="text-slate-400 mt-1" size={20}/>
+                        <div>
+                            <p className="font-bold text-slate-700">Struktur Folder</p>
+                            <p className="text-sm text-slate-500">Terbagi menjadi <code className="bg-slate-100 px-1 rounded">train/</code> dan <code className="bg-slate-100 px-1 rounded">test/</code></p>
+                        </div>
+                    </div>
+                    <div className="flex items-start gap-3">
+                        <Database className="text-slate-400 mt-1" size={20}/>
+                        <div>
+                            <p className="font-bold text-slate-700">Format Label</p>
+                            <p className="text-sm text-slate-500">YOLO Standard (.txt)</p>
+                        </div>
+                    </div>
+                </div>
+                <div className="pt-4 border-t border-slate-200">
+                     <button className="flex items-center gap-2 text-sm text-blue-600 hover:underline">
+                        <AlertCircle size={16}/>
+                        Jalankan Validasi Dataset (Cek Missing Pairs)
+                     </button>
+                </div>
+            </Card>
+        </div>
+        <div className="md:col-span-1">
+             <Card title="Statistik">
+                <div className="space-y-2">
+                    <div className="flex justify-between text-sm">
+                        <span className="text-slate-600">Total Gambar</span>
+                        <span className="font-bold">47,700</span>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                        <span className="text-slate-600">Total Kelas</span>
+                        <span className="font-bold">43</span>
+                    </div>
+                </div>
+             </Card>
+        </div>
+    </div>
+
+    <Card title="Preview Sampel Data">
+      <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+        {[1, 2, 3, 4, 5, 6].map((i) => (
+          <div key={i} className="group relative aspect-square bg-slate-100 border-2 border-dashed border-slate-300 rounded flex flex-col items-center justify-center hover:border-slate-500 cursor-pointer transition-colors">
+            <ImageIcon className="text-slate-300 mb-2 group-hover:text-slate-500" size={32} />
+            <span className="text-xs text-slate-400 font-mono">img_{i}.jpg</span>
+            <div className="absolute bottom-2 left-2 bg-slate-800 text-white text-[10px] px-1 rounded opacity-0 group-hover:opacity-100 transition-opacity">
+                Stop Sign
+            </div>
+          </div>
+        ))}
+      </div>
+      <div className="mt-4 text-center">
+        <span className="text-xs text-slate-400">Menampilkan 6 dari 35k data train</span>
+      </div>
+    </Card>
+  </div>
+);
+
+// --- Halaman 4: Prediksi ---
+const PredictionPage = () => (
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 h-full">
+        {/* Input Section */}
+        <div className="space-y-6">
+            <Card title="Input Gambar">
+                <div className="border-2 border-dashed border-slate-300 rounded-lg h-64 flex flex-col items-center justify-center text-slate-400 bg-slate-50 hover:bg-slate-100 transition-colors cursor-pointer mb-4">
+                    <Upload size={48} className="mb-2 opacity-50"/>
+                    <span className="text-sm font-medium text-slate-600">Drag & drop gambar di sini</span>
+                    <span className="text-xs text-slate-400">atau klik untuk jelajah file lokal</span>
+                </div>
+                <div className="flex gap-3">
+                    <Button label="Jalankan Prediksi" icon={Zap} primary />
+                </div>
+            </Card>
+            
+            <div className="bg-blue-50 border border-blue-200 p-3 rounded text-sm text-blue-800">
+                <p><strong>Catatan:</strong> Hasil prediksi berbasis unggah gambar (bukan real-time stream).</p>
+            </div>
+        </div>
+
+        {/* Output Section */}
+        <div className="space-y-6">
+            <Card title="Hasil Deteksi" className="h-full min-h-[400px]">
+                 <div className="bg-slate-100 h-64 rounded-lg flex items-center justify-center border border-slate-200 relative overflow-hidden mb-4">
+                    <div className="text-center">
+                        <Scan size={48} className="mx-auto text-slate-300 mb-2"/>
+                        <span className="text-slate-400 text-sm">Visualisasi BBox akan muncul di sini</span>
+                    </div>
+                 </div>
+
+                 <div>
+                    <h4 className="font-bold text-sm text-slate-700 mb-2">Daftar Objek Terdeteksi:</h4>
+                    <div className="border border-slate-200 rounded overflow-hidden">
+                        <table className="w-full text-sm text-left">
+                            <thead className="bg-slate-50 text-slate-600 text-xs uppercase">
+                                <tr>
+                                    <th className="p-2 border-b border-slate-200">Class</th>
+                                    <th className="p-2 border-b border-slate-200 text-right">Confidence</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr className="border-b border-slate-100">
+                                    <td className="p-2 font-medium">Stop Sign</td>
+                                    <td className="p-2 text-right font-mono text-green-600">98.2%</td>
+                                </tr>
+                                <tr>
+                                    <td className="p-2 font-medium">No Entry</td>
+                                    <td className="p-2 text-right font-mono text-slate-600">45.1%</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                 </div>
+            </Card>
+        </div>
+    </div>
+);
+
+// --- Layout Utama ---
+export default function App() {
+  const [activePage, setActivePage] = useState('dashboard');
+
+  const renderContent = () => {
+    switch (activePage) {
+      case 'dashboard': return <DashboardPage />;
+      case 'training': return <TrainingPage />;
+      case 'dataset': return <DatasetPage />;
+      case 'prediction': return <PredictionPage />;
+      default: return <DashboardPage />;
+    }
+  };
+
+  return (
+    <div className="flex h-screen bg-slate-100 font-sans text-slate-800 overflow-hidden selection:bg-slate-200">
+      
+      {/* Sidebar Navigasi */}
+      <aside className="w-64 bg-white border-r-2 border-slate-200 flex flex-col flex-shrink-0 z-20">
+        <div className="h-16 flex items-center px-6 border-b-2 border-slate-100">
+          <div className="w-6 h-6 bg-slate-800 rounded mr-3"></div>
+          <span className="font-bold text-lg tracking-tight">ViT Traffic<span className="text-slate-400">Net</span></span>
+        </div>
+
+        <nav className="flex-1 p-4 space-y-1">
+          <button 
+            onClick={() => setActivePage('dashboard')}
+            className={`w-full flex items-center gap-3 px-4 py-3 text-sm font-medium rounded transition-colors ${activePage === 'dashboard' ? 'bg-slate-100 text-slate-900 border border-slate-300' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-700'}`}
+          >
+            <LayoutDashboard size={18} />
+            Dashboard
+          </button>
+          <button 
+            onClick={() => setActivePage('training')}
+            className={`w-full flex items-center gap-3 px-4 py-3 text-sm font-medium rounded transition-colors ${activePage === 'training' ? 'bg-slate-100 text-slate-900 border border-slate-300' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-700'}`}
+          >
+            <Settings size={18} />
+            Training & Model
+          </button>
+          <button 
+            onClick={() => setActivePage('dataset')}
+            className={`w-full flex items-center gap-3 px-4 py-3 text-sm font-medium rounded transition-colors ${activePage === 'dataset' ? 'bg-slate-100 text-slate-900 border border-slate-300' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-700'}`}
+          >
+            <Database size={18} />
+            Dataset Explorer
+          </button>
+          <button 
+            onClick={() => setActivePage('prediction')}
+            className={`w-full flex items-center gap-3 px-4 py-3 text-sm font-medium rounded transition-colors ${activePage === 'prediction' ? 'bg-slate-100 text-slate-900 border border-slate-300' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-700'}`}
+          >
+            <Zap size={18} />
+            Prediksi / Inference
+          </button>
+        </nav>
+
+        <div className="p-4 border-t border-slate-200">
+          <div className="flex items-center gap-3 px-2">
+            <div className="w-8 h-8 rounded-full bg-slate-300"></div>
+            <div>
+              <p className="text-xs font-bold">Admin User</p>
+              <p className="text-[10px] text-slate-400">Researcher</p>
+            </div>
+          </div>
+        </div>
+      </aside>
+
+      {/* Area Konten */}
+      <main className="flex-1 flex flex-col min-w-0 bg-slate-50">
+        {/* Header Sederhana */}
+        <header className="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-8 flex-shrink-0">
+          <h2 className="text-xl font-bold text-slate-700 capitalize">
+            {activePage === 'dashboard' ? 'System Overview' : activePage.replace('_', ' ')}
+          </h2>
+        </header>
+
+        {/* Konten Scrollable */}
+        <div className="flex-1 overflow-auto p-8">
+          <div className="max-w-6xl mx-auto">
+            {renderContent()}
+          </div>
+        </div>
+      </main>
+    </div>
+  );
+}

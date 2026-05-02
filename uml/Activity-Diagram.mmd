@@ -1,0 +1,23 @@
+flowchart TD
+  subgraph Training
+    TStart((Start))
+    TA[Load Dataset dari Kaggle]
+    TB[Preprocess & Split Train/Val/Test]
+    TC[Konfigurasi YOLOS]
+    TD[Training]
+    TE[Evaluasi (IoU, Precision, Recall, mAP)]
+    TF[Simpan Model]
+    TEnd((End))
+    TStart --> TA --> TB --> TC --> TD --> TE --> TF --> TEnd
+  end
+
+  subgraph Prediction
+    PStart((Start))
+    PA[User Upload Gambar]
+    PB[Preprocess Image]
+    PC[Inferensi YOLOS]
+    PD[Postprocess (BBox, Label, Score)]
+    PE[Tampilkan Hasil]
+    PEnd((End))
+    PStart --> PA --> PB --> PC --> PD --> PE --> PEnd
+  end

@@ -1,0 +1,19 @@
+graph TD
+  Admin([Admin])
+  User([User])
+
+  UC1((Scan Dataset))
+  UC2((Pilih Kelas))
+  UC3((Train Model))
+  UC4((Lihat History Training))
+  UC5((Aktifkan Model))
+  UC6((Upload Gambar))
+  UC7((Lihat Hasil Deteksi))
+
+  Admin --> UC1
+  Admin --> UC2
+  Admin --> UC3
+  Admin --> UC4
+  Admin --> UC5
+  User --> UC6
+  User --> UC7
