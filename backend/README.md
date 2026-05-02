@@ -45,6 +45,18 @@ docker run --rm --gpus all -p 8000:8000 \
 You can adjust the score threshold with `SCORE_THRESHOLD` (default 0.5).
 Data and model paths can also be overridden with `DATA_ROOT` and `MODELS_ROOT`.
 
+## Docker Compose Development Mode
+
+When running with `docker compose up backend`:
+- local folder `backend/` is mounted into `/app/backend`
+- API runs with `uvicorn --reload`
+- Python source changes do not require image rebuild
+
+You still need to rebuild if:
+- `backend/requirements.txt` changes
+- `backend/Dockerfile` changes
+- container dependencies need to be refreshed
+
 ### Main endpoints
 
 - `GET /health`

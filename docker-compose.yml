@@ -3,9 +3,11 @@ services:
     build:
       context: .
       dockerfile: backend/Dockerfile
+    command: ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
     ports:
       - "8000:8000"
     volumes:
+      - ./backend:/app/backend
       - ./data:/app/data
       - ./backend/models:/app/backend/models
     environment:
@@ -20,6 +22,7 @@ services:
       dockerfile: backend/Dockerfile
     command: ["python", "train.py", "--data-dir", "/app/data/traffic_sign", "--epochs", "30", "--batch-size", "1", "--image-size", "512", "--amp", "--lr-step", "10", "--lr-gamma", "0.5", "--model-name", "hustvl/yolos-tiny"]
     volumes:
+      - ./backend:/app/backend
       - ./data:/app/data
       - ./backend/models:/app/backend/models
     environment:

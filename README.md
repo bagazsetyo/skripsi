@@ -41,6 +41,16 @@ Secara umum:
 docker compose up backend
 ```
 
+Mode backend sekarang berjalan dalam mode development:
+- source code `backend/` di-mount langsung ke container
+- `uvicorn` dijalankan dengan `--reload`
+- perubahan file Python tidak perlu rebuild image
+
+Rebuild backend hanya diperlukan jika:
+- `backend/requirements.txt` berubah
+- `backend/Dockerfile` berubah
+- base image/dependency container berubah
+
 Untuk training:
 
 ```bash
