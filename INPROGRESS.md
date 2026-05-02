@@ -42,7 +42,7 @@ Kenapa ini penting:
 - sekarang risiko mismatch masih tinggi antara skripsi, dataset, dan kode
 
 ### Step 3 — Buat dataset scanner
-Status: `next`
+Status: `done`
 
 Target:
 - baca folder `train/` dan `test/`
@@ -57,7 +57,7 @@ Kenapa ini dikerjakan lebih awal:
 - halaman Dataset dan validasi training sama-sama butuh data ini
 
 ### Step 4 — Tambahkan dataset validator
-Status: `pending`
+Status: `next`
 
 Target:
 - cek pasangan `.jpg` dan `.txt`
@@ -214,9 +214,9 @@ Output selesai:
 
 Kalau ingin paling aman dan paling efisien, mulai dari tiga task ini dulu:
 
-1. Step 3 — Buat dataset scanner
-2. Step 4 — Tambahkan dataset validator
-3. Step 5 — Buat endpoint dataset
+1. Step 4 — Tambahkan dataset validator
+2. Step 5 — Buat endpoint dataset
+3. Step 6 — Siapkan training request berbasis subset kelas
 
 Alasannya:
 - kecil
