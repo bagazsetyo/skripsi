@@ -57,7 +57,7 @@ Kenapa ini dikerjakan lebih awal:
 - halaman Dataset dan validasi training sama-sama butuh data ini
 
 ### Step 4 — Tambahkan dataset validator
-Status: `next`
+Status: `done`
 
 Target:
 - cek pasangan `.jpg` dan `.txt`
@@ -72,7 +72,7 @@ Kenapa ini penting:
 - mengurangi risiko training gagal karena data kotor
 
 ### Step 5 — Buat endpoint dataset
-Status: `pending`
+Status: `next`
 
 Target:
 - endpoint summary dataset
@@ -214,9 +214,9 @@ Output selesai:
 
 Kalau ingin paling aman dan paling efisien, mulai dari tiga task ini dulu:
 
-1. Step 4 — Tambahkan dataset validator
-2. Step 5 — Buat endpoint dataset
-3. Step 6 — Siapkan training request berbasis subset kelas
+1. Step 5 — Buat endpoint dataset
+2. Step 6 — Siapkan training request berbasis subset kelas
+3. Step 7 — Buat model registry dengan SQLite
 
 Alasannya:
 - kecil
