@@ -57,6 +57,32 @@ Untuk training:
 docker compose --profile train up train
 ```
 
+## Menjalankan Frontend
+
+Frontend juga sudah disiapkan dalam mode development via Docker.
+
+Jalankan:
+
+```bash
+docker compose up frontend
+```
+
+Atau jalankan backend dan frontend sekaligus:
+
+```bash
+docker compose up backend frontend
+```
+
+Mode frontend sekarang berjalan dalam mode development:
+- source code `frontend/` di-mount langsung ke container
+- Vite berjalan di `0.0.0.0:5173`
+- perubahan file frontend tidak perlu rebuild image
+
+Rebuild frontend hanya diperlukan jika:
+- `frontend/package.json` berubah
+- `frontend/Dockerfile` berubah
+- dependency Node berubah
+
 ## Catatan Repo
 
 - `docker-compose.yml` masih perlu dirapikan sebelum implementasi final

@@ -32,3 +32,18 @@ npm run dev
 ```
 
 Sebelum menjalankan, copy `.env.example` menjadi `.env` jika ingin mengganti base URL API.
+
+## Menjalankan Dengan Docker
+
+Frontend juga bisa dijalankan lewat Docker Compose:
+
+```bash
+docker compose up frontend
+```
+
+Mode ini memakai:
+- mount `frontend/` langsung ke container
+- Vite dev server pada port `5173`
+- hot reload tanpa rebuild image untuk perubahan source code
+
+Rebuild hanya diperlukan jika `package.json` atau `Dockerfile` berubah.
