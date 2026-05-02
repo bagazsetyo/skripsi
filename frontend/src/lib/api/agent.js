@@ -1,6 +1,6 @@
 import axios from "axios";
 
-export const http = axios.create({
+export const agent = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL || "http://localhost:8000",
   timeout: 30_000,
 });

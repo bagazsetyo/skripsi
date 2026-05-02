@@ -1,5 +1,5 @@
 import { Col, Row, Statistic, Tag, Typography } from "antd";
-import { PageSection } from "../components/ui/PageSection";
+import { PageSection } from "../../app/shared/PageSection";
 
 export function DashboardPage() {
   return (

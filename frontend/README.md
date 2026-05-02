@@ -11,14 +11,18 @@ Frontend ini disiapkan dengan:
 
 ## Struktur Utama
 
-- `src/app/`: provider global
-- `src/layouts/`: layout shell aplikasi
-- `src/router/`: definisi route
-- `src/pages/`: halaman utama
-- `src/features/`: area fitur per domain
-- `src/components/`: komponen reusable
-- `src/lib/`: utilitas global seperti axios dan query client
+- `src/app/`: layout aplikasi, router, provider, dan shared UI global
+- `src/features/`: area fitur per domain seperti dashboard, dataset, training, prediction
+- `src/lib/`: API client, react-query, hooks, types, utils
 - `src/styles/`: CSS global
+
+Struktur ini sekarang mengikuti pola yang lebih dekat ke referensi belajar:
+
+- `app/layout`
+- `app/router`
+- `app/shared`
+- `features/...`
+- `lib/...`
 
 ## Menjalankan
 

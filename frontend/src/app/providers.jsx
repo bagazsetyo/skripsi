@@ -1,6 +1,6 @@
 import { QueryClientProvider } from "@tanstack/react-query";
 import { ConfigProvider, App as AntdApp } from "antd";
-import { queryClient } from "../lib/queryClient";
+import { queryClient } from "../lib/react-query/queryClient";
 
 const theme = {
   token: {
