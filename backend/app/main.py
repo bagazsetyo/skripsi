@@ -20,6 +20,7 @@ def load_model():
             f"Model not found at {MODEL_PATH}. Train the model before starting the API."
         )
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    # Prediction fallback labels come from the shared class registry in config.py.
     predictor = Predictor(MODEL_PATH, CLASS_NAMES, device)
 
 

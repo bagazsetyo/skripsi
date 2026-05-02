@@ -11,6 +11,7 @@ from dataset import TrafficSignDataset, collate_fn
 
 
 def build_model(model_name: str, class_names):
+    # Keep model label order aligned with the single class registry in config.py.
     id2label = {idx: name for idx, name in enumerate(class_names)}
     label2id = {name: idx for idx, name in enumerate(class_names)}
     return YolosForObjectDetection.from_pretrained(

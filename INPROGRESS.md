@@ -27,7 +27,7 @@ Kenapa ini dulu:
 - hampir semua fitur lain bergantung pada konfigurasi kelas dan path yang benar
 
 ### Step 2 — Buat sumber data kelas yang tunggal
-Status: `next`
+Status: `done`
 
 Target:
 - satu sumber mapping untuk:
@@ -42,7 +42,7 @@ Kenapa ini penting:
 - sekarang risiko mismatch masih tinggi antara skripsi, dataset, dan kode
 
 ### Step 3 — Buat dataset scanner
-Status: `pending`
+Status: `next`
 
 Target:
 - baca folder `train/` dan `test/`
@@ -214,9 +214,9 @@ Output selesai:
 
 Kalau ingin paling aman dan paling efisien, mulai dari tiga task ini dulu:
 
-1. Step 2 — Buat sumber data kelas yang tunggal
-2. Step 3 — Buat dataset scanner
-3. Step 4 — Tambahkan dataset validator
+1. Step 3 — Buat dataset scanner
+2. Step 4 — Tambahkan dataset validator
+3. Step 5 — Buat endpoint dataset
 
 Alasannya:
 - kecil
