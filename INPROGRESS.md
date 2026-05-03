@@ -160,7 +160,7 @@ Kenapa belum dikerjakan sekarang:
 - lebih efisien bila kontrak API inti sudah terbentuk dulu
 
 ### Step 12 — Implement halaman Dataset dulu
-Status: `next`
+Status: `done`
 
 Target:
 - tampilkan daftar kelas
@@ -174,7 +174,7 @@ Kenapa ini halaman pertama:
 - paling ringan, paling aman, dan langsung memakai endpoint yang stabil
 
 ### Step 13 — Implement halaman Training & Model
-Status: `pending`
+Status: `next`
 
 Target:
 - form training
@@ -214,9 +214,9 @@ Output selesai:
 
 Kalau ingin paling aman dan paling efisien, mulai dari tiga task ini dulu:
 
-1. Step 12 — Implement halaman Dataset dulu
-2. Step 13 — Implement halaman Training & Model
-3. Step 14 — Implement halaman Prediksi
+1. Step 13 — Implement halaman Training & Model
+2. Step 14 — Implement halaman Prediksi
+3. Step 15 — Implement Dashboard
 
 Alasannya:
 - kecil
