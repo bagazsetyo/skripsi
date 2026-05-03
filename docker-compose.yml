@@ -11,6 +11,7 @@ services:
       - ./data:/app/data
       - ./backend/models:/app/backend/models
     environment:
+      CORS_ALLOW_ORIGINS: "http://localhost:5173,http://127.0.0.1:5173"
       DATA_ROOT: "/app/data"
       MODELS_ROOT: "/app/backend/models"
       SCORE_THRESHOLD: "0.5"

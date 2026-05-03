@@ -4,12 +4,13 @@ from io import BytesIO
 from pathlib import Path
 
 from fastapi import BackgroundTasks, FastAPI, File, HTTPException, UploadFile
+from fastapi.middleware.cors import CORSMiddleware
 from PIL import Image
 import torch
 
 from app.inference import Predictor
 from app.schemas import PredictionResponse, TrainingRequest
-from config import CLASS_NAMES, SCORE_THRESHOLD
+from config import CLASS_NAMES, CORS_ALLOW_ORIGINS, SCORE_THRESHOLD
 from dataset_scan import build_class_lookup, scan_dataset, validate_dataset
 from db import get_active_model, get_training_run, init_db, list_models, list_training_runs
 from model_registry import activate_model, ensure_default_model_registered, get_model_or_none, resolve_active_model_path
@@ -20,6 +21,14 @@ from training_service import (
 )
 
 app = FastAPI(title="Traffic Sign Detection API")
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=CORS_ALLOW_ORIGINS,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 predictor: Predictor | None = None
 active_model_cache: dict | None = None

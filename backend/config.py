@@ -116,3 +116,14 @@ CLASS_LABEL_TO_DIRECTORY = {
 }
 
 SCORE_THRESHOLD = float(os.getenv("SCORE_THRESHOLD", "0.5"))
+
+
+def _parse_cors_origins() -> list[str]:
+    raw_value = os.getenv(
+        "CORS_ALLOW_ORIGINS",
+        "http://localhost:5173,http://127.0.0.1:5173",
+    )
+    return [item.strip() for item in raw_value.split(",") if item.strip()]
+
+
+CORS_ALLOW_ORIGINS = _parse_cors_origins()

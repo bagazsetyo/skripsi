@@ -44,6 +44,7 @@ docker run --rm --gpus all -p 8000:8000 \
 
 You can adjust the score threshold with `SCORE_THRESHOLD` (default 0.5).
 Data and model paths can also be overridden with `DATA_ROOT` and `MODELS_ROOT`.
+Frontend origins can be adjusted with `CORS_ALLOW_ORIGINS`.
 
 ## Docker Compose Development Mode
 
