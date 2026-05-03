@@ -174,7 +174,7 @@ Kenapa ini halaman pertama:
 - paling ringan, paling aman, dan langsung memakai endpoint yang stabil
 
 ### Step 13 — Implement halaman Training & Model
-Status: `next`
+Status: `done`
 
 Target:
 - form training
@@ -186,7 +186,7 @@ Output selesai:
 - alur inti skripsi mulai terlihat
 
 ### Step 14 — Implement halaman Prediksi
-Status: `pending`
+Status: `next`
 
 Target:
 - upload gambar
@@ -214,9 +214,9 @@ Output selesai:
 
 Kalau ingin paling aman dan paling efisien, mulai dari tiga task ini dulu:
 
-1. Step 13 — Implement halaman Training & Model
-2. Step 14 — Implement halaman Prediksi
-3. Step 15 — Implement Dashboard
+1. Step 14 — Implement halaman Prediksi
+2. Step 15 — Implement Dashboard
+3. Polishing UI dan integrasi end-to-end
 
 Alasannya:
 - kecil

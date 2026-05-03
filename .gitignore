@@ -46,3 +46,7 @@ uploads/
 # Environment files
 .env
 .env.*
+
+# Local instruction / scratch files
+AGENTS.md
+ERRORS.md
