@@ -16,6 +16,21 @@ export function TrainingRunForm({ config, isSubmitting, onSubmit }) {
     form.resetFields(["run_name", "output_version"]);
   };
 
+  const handleValuesChange = (changedValues) => {
+    if (!Object.prototype.hasOwnProperty.call(changedValues, "selection_mode")) {
+      return;
+    }
+
+    if (changedValues.selection_mode === "subset") {
+      form.setFieldValue("selected_classes", []);
+      return;
+    }
+
+    if (changedValues.selection_mode === "all") {
+      form.setFieldValue("selected_classes", defaults?.selected_classes ?? []);
+    }
+  };
+
   return (
     <PageSection
       title="Buat Training Run"
@@ -31,6 +46,7 @@ export function TrainingRunForm({ config, isSubmitting, onSubmit }) {
           activate_after_training: defaults?.activate_after_training ?? true,
           use_amp: defaults?.use_amp ?? true,
         }}
+        onValuesChange={handleValuesChange}
         onFinish={handleFinish}
       >
         <Row gutter={[16, 0]}>
