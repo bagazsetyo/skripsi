@@ -8,9 +8,9 @@ export function useTrainingWorkspace() {
   const [configQuery, runsQuery, modelsQuery, activeModelQuery] = useQueries({
     queries: [
       { queryKey: ["training", "config"], queryFn: trainingApi.getConfig },
-      { queryKey: ["training", "runs"], queryFn: trainingApi.getRuns, refetchInterval: 10_000 },
-      { queryKey: ["models"], queryFn: trainingApi.getModels, refetchInterval: 10_000 },
-      { queryKey: ["models", "active"], queryFn: trainingApi.getActiveModel, retry: false, refetchInterval: 10_000 },
+      { queryKey: ["training", "runs"], queryFn: trainingApi.getRuns },
+      { queryKey: ["models"], queryFn: trainingApi.getModels },
+      { queryKey: ["models", "active"], queryFn: trainingApi.getActiveModel, retry: false },
     ],
   });
 
