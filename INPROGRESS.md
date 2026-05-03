@@ -198,7 +198,7 @@ Output selesai:
 - demo end-to-end sudah usable
 
 ### Step 15 — Implement Dashboard
-Status: `next`
+Status: `done`
 
 Target:
 - ringkasan model aktif
@@ -214,9 +214,9 @@ Output selesai:
 
 Kalau ingin paling aman dan paling efisien, mulai dari tiga task ini dulu:
 
-1. Step 15 — Implement Dashboard
-2. Polishing UI dan integrasi end-to-end
-3. Uji manual seluruh alur aplikasi
+1. Polishing UI dan integrasi end-to-end
+2. Uji manual seluruh alur aplikasi
+3. Dokumentasi screenshot untuk skripsi
 
 Alasannya:
 - kecil
