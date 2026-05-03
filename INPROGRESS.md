@@ -186,7 +186,7 @@ Output selesai:
 - alur inti skripsi mulai terlihat
 
 ### Step 14 — Implement halaman Prediksi
-Status: `next`
+Status: `done`
 
 Target:
 - upload gambar
@@ -198,7 +198,7 @@ Output selesai:
 - demo end-to-end sudah usable
 
 ### Step 15 — Implement Dashboard
-Status: `pending`
+Status: `next`
 
 Target:
 - ringkasan model aktif
@@ -214,9 +214,9 @@ Output selesai:
 
 Kalau ingin paling aman dan paling efisien, mulai dari tiga task ini dulu:
 
-1. Step 14 — Implement halaman Prediksi
-2. Step 15 — Implement Dashboard
-3. Polishing UI dan integrasi end-to-end
+1. Step 15 — Implement Dashboard
+2. Polishing UI dan integrasi end-to-end
+3. Uji manual seluruh alur aplikasi
 
 Alasannya:
 - kecil
