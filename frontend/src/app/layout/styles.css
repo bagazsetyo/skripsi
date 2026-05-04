@@ -66,9 +66,6 @@
 }
 
 .guide-tip-card {
-  display: flex;
-  gap: 14px;
-  align-items: flex-start;
   height: 100%;
   border-radius: 18px;
   padding: 18px;
@@ -76,17 +73,99 @@
   border: 1px solid rgba(15, 118, 110, 0.08);
 }
 
-.guide-tip-icon {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 42px;
-  height: 42px;
+.guide-collapse {
+  background: transparent !important;
+}
+
+.guide-collapse .ant-collapse-item {
+  border-radius: 20px !important;
+  overflow: hidden;
+  border: 1px solid rgba(15, 118, 110, 0.12) !important;
+  margin-bottom: 14px;
+  background: rgba(255, 255, 255, 0.92);
+}
+
+.guide-collapse .ant-collapse-header {
+  align-items: flex-start !important;
+}
+
+.guide-collapse-label {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding-right: 16px;
+}
+
+.guide-preview-placeholder {
+  padding: 18px;
+  border-radius: 22px;
+  background: radial-gradient(circle at top, rgba(45, 212, 191, 0.18), rgba(255, 255, 255, 0.92));
+  border: 1px dashed rgba(15, 118, 110, 0.25);
+}
+
+.guide-preview-window {
+  overflow: hidden;
+  border-radius: 16px;
+  background: #ffffff;
+  border: 1px solid rgba(15, 118, 110, 0.08);
+  box-shadow: 0 18px 48px rgba(15, 23, 42, 0.08);
+}
+
+.guide-preview-bar {
+  display: flex;
+  gap: 8px;
+  padding: 12px 14px;
+  border-bottom: 1px solid rgba(15, 118, 110, 0.08);
+  background: rgba(240, 253, 250, 0.8);
+}
+
+.guide-preview-bar span {
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  background: rgba(15, 118, 110, 0.28);
+}
+
+.guide-preview-body {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 18px;
+}
+
+.guide-preview-hero {
+  height: 150px;
   border-radius: 14px;
-  background: linear-gradient(135deg, #0f766e, #164e63);
-  color: #ffffff;
-  flex-shrink: 0;
-  font-size: 18px;
+  background: linear-gradient(135deg, rgba(15, 118, 110, 0.18), rgba(22, 78, 99, 0.28));
+}
+
+.guide-preview-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+.guide-preview-grid div {
+  height: 78px;
+  border-radius: 12px;
+  background: rgba(15, 118, 110, 0.08);
+}
+
+.guide-inline-list {
+  margin: 0;
+  padding-left: 18px;
+}
+
+.guide-inline-list li + li {
+  margin-top: 6px;
+}
+
+.guide-detail-list .ant-list-item {
+  padding-inline: 0;
+}
+
+.guide-detail-list .ant-list-item-meta {
+  margin-bottom: 0 !important;
 }
 
 @media (max-width: 768px) {

@@ -1,73 +1,91 @@
-import { Alert, Col, Row, Steps, Tag, Typography } from "antd";
-import {
-  BookOutlined,
-  CameraOutlined,
-  DatabaseOutlined,
-  LineChartOutlined,
-  RadarChartOutlined,
-  RocketOutlined,
-} from "@ant-design/icons";
+import { Alert, Col, Collapse, Divider, List, Row, Steps, Tag, Typography } from "antd";
+import { BookOutlined, InfoCircleOutlined } from "@ant-design/icons";
 import { PageSection } from "../../app/shared/PageSection";
+import { menuGuideDetails, predictionTips, quickStartSteps } from "./guideContent";
 
-const quickStartSteps = [
-  {
-    title: "Cek Dataset",
-    description:
-      "Buka menu Dataset untuk melihat jumlah gambar, jumlah anotasi, dan memastikan data terbaca oleh sistem.",
-  },
-  {
-    title: "Siapkan Training",
-    description:
-      "Masuk ke menu Training & Model untuk memilih semua kelas atau subset kelas, lalu jalankan training.",
-  },
-  {
-    title: "Pilih Model Aktif",
-    description:
-      "Setelah model tersedia, aktifkan model yang ingin dipakai untuk proses prediksi.",
-  },
-  {
-    title: "Jalankan Prediksi",
-    description:
-      "Buka menu Prediksi, unggah gambar rambu, lalu sistem akan menampilkan label, confidence, dan bounding box.",
-  },
-];
+function PlaceholderPreview({ title }) {
+  return (
+    <div className="guide-preview-placeholder">
+      <div className="guide-preview-window">
+        <div className="guide-preview-bar">
+          <span />
+          <span />
+          <span />
+        </div>
+        <div className="guide-preview-body">
+          <div className="guide-preview-hero" />
+          <div className="guide-preview-grid">
+            <div />
+            <div />
+            <div />
+          </div>
+          <Typography.Text type="secondary">{title}</Typography.Text>
+        </div>
+      </div>
+    </div>
+  );
+}
 
-const menuGuides = [
-  {
-    title: "Dashboard",
-    icon: <LineChartOutlined />,
-    color: "geekblue",
-    description:
-      "Menampilkan ringkasan umum sistem seperti model aktif, kondisi dataset, dan riwayat training terbaru.",
-  },
-  {
-    title: "Dataset",
-    icon: <DatabaseOutlined />,
-    color: "cyan",
-    description:
-      "Digunakan untuk melihat statistik dataset, pembagian train-test, daftar kelas, dan hasil validasi dataset.",
-  },
-  {
-    title: "Training & Model",
-    icon: <RocketOutlined />,
-    color: "volcano",
-    description:
-      "Dipakai untuk membuat training run baru, melihat model yang tersedia, serta memilih model aktif.",
-  },
-  {
-    title: "Prediksi",
-    icon: <RadarChartOutlined />,
-    color: "green",
-    description:
-      "Digunakan untuk menguji model dengan gambar statis dan melihat hasil deteksi rambu lalu lintas.",
-  },
-];
+const collapseItems = menuGuideDetails.map((item) => {
+  const Icon = item.icon;
 
-const predictionTips = [
-  "Gunakan gambar yang cukup jelas agar bentuk rambu mudah terbaca oleh model.",
-  "Jika hasil deteksi terlalu sedikit, turunkan score threshold secara bertahap.",
-  "Pastikan model aktif sudah sesuai dengan eksperimen yang ingin diuji.",
-];
+  return {
+    key: item.key,
+    label: (
+      <div className="guide-collapse-label">
+        <Tag color={item.color} className="guide-menu-tag">
+          <Icon />
+          <span>{item.title}</span>
+        </Tag>
+        <Typography.Text>{item.summary}</Typography.Text>
+      </div>
+    ),
+    children: (
+      <Row gutter={[20, 20]}>
+        <Col xs={24} xl={10}>
+          <PlaceholderPreview title={item.imageLabel} />
+        </Col>
+        <Col xs={24} xl={14}>
+          <div className="page-stack">
+            <Typography.Paragraph style={{ marginBottom: 0 }}>
+              {item.description}
+            </Typography.Paragraph>
+
+            <Alert
+              type="info"
+              showIcon
+              icon={<InfoCircleOutlined />}
+              message={`Fungsi utama menu ${item.title}`}
+              description={
+                <ul className="guide-inline-list">
+                  {item.bullets.map((bullet) => (
+                    <li key={bullet}>{bullet}</li>
+                  ))}
+                </ul>
+              }
+            />
+
+            <div>
+              <Typography.Title level={5}>Penjelasan Komponen</Typography.Title>
+              <List
+                className="guide-detail-list"
+                dataSource={item.details}
+                renderItem={(detail) => (
+                  <List.Item>
+                    <List.Item.Meta
+                      title={detail.label}
+                      description={detail.description}
+                    />
+                  </List.Item>
+                )}
+              />
+            </div>
+          </div>
+        </Col>
+      </Row>
+    ),
+  };
+});
 
 export function UserGuidePage() {
   return (
@@ -96,24 +114,10 @@ export function UserGuidePage() {
       </PageSection>
 
       <PageSection
-        title="Panduan Setiap Menu"
-        subtitle="Bagian ini membantu memahami fungsi masing-masing menu tanpa harus mencoba semuanya sekaligus."
+        title="Manual Book Interaktif"
+        subtitle="Klik salah satu menu di bawah untuk melihat gambar placeholder dan penjelasan detail tiap bagian halaman."
       >
-        <Row gutter={[16, 16]}>
-          {menuGuides.map((item) => (
-            <Col xs={24} md={12} key={item.title}>
-              <div className="guide-menu-card">
-                <Tag color={item.color} className="guide-menu-tag">
-                  {item.icon}
-                  <span>{item.title}</span>
-                </Tag>
-                <Typography.Paragraph style={{ marginBottom: 0 }}>
-                  {item.description}
-                </Typography.Paragraph>
-              </div>
-            </Col>
-          ))}
-        </Row>
+        <Collapse items={collapseItems} accordion size="large" className="guide-collapse" />
       </PageSection>
 
       <PageSection
@@ -151,18 +155,17 @@ export function UserGuidePage() {
         subtitle="Catatan kecil ini membantu pengguna mendapatkan hasil yang lebih mudah dibaca."
       >
         <Row gutter={[16, 16]}>
-          {predictionTips.map((tip, index) => (
+          {predictionTips.map((tip) => (
             <Col xs={24} md={8} key={tip}>
               <div className="guide-tip-card">
-                <div className="guide-tip-icon">
-                  {index === 0 ? <CameraOutlined /> : index === 1 ? <RadarChartOutlined /> : <RocketOutlined />}
-                </div>
                 <Typography.Text>{tip}</Typography.Text>
               </div>
             </Col>
           ))}
         </Row>
       </PageSection>
+
+      <Divider style={{ margin: 0 }} />
     </div>
   );
 }
