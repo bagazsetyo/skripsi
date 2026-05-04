@@ -22,6 +22,8 @@ function App() {
                   ? "Training & Model Workspace"
                   : location.pathname === "/prediction"
                     ? "Prediction Workspace"
+                    : location.pathname === "/login"
+                      ? "Login Admin"
                     : location.pathname === "/guide"
                       ? "Panduan Penggunaan Aplikasi"
                       : location.pathname === "/method"

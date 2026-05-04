@@ -1,6 +1,7 @@
 import { QueryClientProvider } from "@tanstack/react-query";
 import { ConfigProvider, App as AntdApp } from "antd";
 import { queryClient } from "../lib/react-query/queryClient";
+import { AuthProvider } from "../features/auth/AuthProvider";
 
 const theme = {
   token: {
@@ -18,7 +19,9 @@ export function AppProviders({ children }) {
   return (
     <ConfigProvider theme={theme}>
       <AntdApp>
-        <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+        <QueryClientProvider client={queryClient}>
+          <AuthProvider>{children}</AuthProvider>
+        </QueryClientProvider>
       </AntdApp>
     </ConfigProvider>
   );

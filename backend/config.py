@@ -1,4 +1,5 @@
 import os
+import secrets
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -21,6 +22,9 @@ DEFAULT_BATCH_SIZE = int(os.getenv("DEFAULT_BATCH_SIZE", "1"))
 DEFAULT_EPOCHS = int(os.getenv("DEFAULT_EPOCHS", "30"))
 DEFAULT_LEARNING_RATE = float(os.getenv("DEFAULT_LEARNING_RATE", "1e-4"))
 DEFAULT_WEIGHT_DECAY = float(os.getenv("DEFAULT_WEIGHT_DECAY", "1e-4"))
+AUTH_SECRET_KEY = os.getenv("AUTH_SECRET_KEY", "skripsi-dev-secret-key-change-me")
+ADMIN_USERNAME = os.getenv("ADMIN_USERNAME", "admin")
+ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD", "admin123")
 
 
 @dataclass(frozen=True)

@@ -61,6 +61,18 @@ class ActivateModelRequest(BaseModel):
     model_id: int
 
 
+class LoginRequest(BaseModel):
+    username: str = Field(min_length=1, max_length=100)
+    password: str = Field(min_length=1, max_length=100)
+
+
+class LoginResponse(BaseModel):
+    access_token: str
+    token_type: str = "bearer"
+    username: str
+    role: str
+
+
 class PredictionResponse(BaseModel):
     model_id: int | None
     model_version: str | None

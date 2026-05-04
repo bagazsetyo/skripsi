@@ -309,7 +309,7 @@ Kenapa ini penting:
 - membantu dokumentasi penggunaan sistem
 
 ### Step 20 — Tambahkan autentikasi login sederhana
-Status: `pending`
+Status: `done`
 
 Target:
 - sediakan login hanya untuk admin tanpa fitur register

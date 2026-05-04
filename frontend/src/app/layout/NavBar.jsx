@@ -1,28 +1,38 @@
 import {
+  LoginOutlined,
   DatabaseOutlined,
   DashboardOutlined,
   DeploymentUnitOutlined,
+  LogoutOutlined,
   RadarChartOutlined,
   RocketOutlined,
   ReadOutlined,
 } from "@ant-design/icons";
 import { Layout, Menu, Typography } from "antd";
 import { useLocation, useNavigate } from "react-router-dom";
+import { useAuth } from "../../features/auth/AuthProvider";
 
 const { Sider } = Layout;
-
-const menuItems = [
-  { key: "/dashboard", icon: <DashboardOutlined />, label: "Dashboard" },
-  { key: "/dataset", icon: <DatabaseOutlined />, label: "Dataset" },
-  { key: "/training", icon: <RocketOutlined />, label: "Training & Model" },
-  { key: "/prediction", icon: <RadarChartOutlined />, label: "Prediksi" },
-  { key: "/guide", icon: <ReadOutlined />, label: "User Guide" },
-  { key: "/method", icon: <DeploymentUnitOutlined />, label: "Cara Kerja YOLOS" },
-];
 
 export function AppNavBar() {
   const location = useLocation();
   const navigate = useNavigate();
+  const { isAuthenticated, logout } = useAuth();
+
+  const menuItems = [
+    { key: "/prediction", icon: <RadarChartOutlined />, label: "Prediksi" },
+    { key: "/guide", icon: <ReadOutlined />, label: "User Guide" },
+    { key: "/method", icon: <DeploymentUnitOutlined />, label: "Cara Kerja YOLOS" },
+    ...(isAuthenticated
+      ? [
+          { type: "divider" },
+          { key: "/dashboard", icon: <DashboardOutlined />, label: "Dashboard" },
+          { key: "/dataset", icon: <DatabaseOutlined />, label: "Dataset" },
+          { key: "/training", icon: <RocketOutlined />, label: "Training & Model" },
+          { key: "__logout__", icon: <LogoutOutlined />, label: "Logout Admin" },
+        ]
+      : [{ type: "divider" }, { key: "/login", icon: <LoginOutlined />, label: "Login Admin" }]),
+  ];
 
   return (
     <Sider
@@ -45,9 +55,16 @@ export function AppNavBar() {
       </div>
       <Menu
         mode="inline"
-        selectedKeys={[location.pathname === "/" ? "/dashboard" : location.pathname]}
+        selectedKeys={[location.pathname === "/" ? "/prediction" : location.pathname]}
         items={menuItems}
-        onClick={({ key }) => navigate(key)}
+        onClick={({ key }) => {
+          if (key === "__logout__") {
+            logout();
+            navigate("/prediction");
+            return;
+          }
+          navigate(key);
+        }}
         theme="dark"
         style={{
           background: "transparent",

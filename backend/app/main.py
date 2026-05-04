@@ -3,13 +3,14 @@ from __future__ import annotations
 from io import BytesIO
 from pathlib import Path
 
-from fastapi import BackgroundTasks, FastAPI, File, HTTPException, UploadFile
+from fastapi import BackgroundTasks, Depends, FastAPI, File, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from PIL import Image
 import torch
 
+from app.auth import authenticate_admin, create_access_token, get_current_admin
 from app.inference import Predictor
-from app.schemas import PredictionResponse, TrainingRequest
+from app.schemas import LoginRequest, LoginResponse, PredictionResponse, TrainingRequest
 from config import CLASS_NAMES, CORS_ALLOW_ORIGINS, SCORE_THRESHOLD
 from dataset_scan import build_class_lookup, scan_dataset, validate_dataset
 from db import (
@@ -127,23 +128,42 @@ def health():
     }
 
 
+@app.post("/auth/login", response_model=LoginResponse)
+def auth_login(request: LoginRequest):
+    admin = authenticate_admin(request.username, request.password)
+    if admin is None:
+        raise HTTPException(status_code=401, detail="Username atau password salah")
+
+    token = create_access_token(admin)
+    return LoginResponse(
+        access_token=token,
+        username=admin["username"],
+        role=admin["role"],
+    )
+
+
+@app.get("/auth/me")
+def auth_me(current_admin: dict = Depends(get_current_admin)):
+    return current_admin
+
+
 @app.get("/dataset/classes")
-def dataset_classes():
+def dataset_classes(_: dict = Depends(get_current_admin)):
     return build_class_lookup()
 
 
 @app.get("/dataset/summary")
-def dataset_summary():
+def dataset_summary(_: dict = Depends(get_current_admin)):
     return get_dataset_cache_payload("summary")
 
 
 @app.get("/dataset/validation")
-def dataset_validation():
+def dataset_validation(_: dict = Depends(get_current_admin)):
     return get_dataset_cache_payload("validation")
 
 
 @app.post("/dataset/refresh")
-def dataset_refresh(background_tasks: BackgroundTasks):
+def dataset_refresh(background_tasks: BackgroundTasks, _: dict = Depends(get_current_admin)):
     if dataset_refresh_state["is_refreshing"]:
         return {
             "status": "running",
@@ -159,7 +179,7 @@ def dataset_refresh(background_tasks: BackgroundTasks):
 
 
 @app.get("/training/config")
-def training_config():
+def training_config(_: dict = Depends(get_current_admin)):
     return {
         "selection_modes": ["all", "subset"],
         "available_classes": build_class_lookup(),
@@ -168,7 +188,11 @@ def training_config():
 
 
 @app.post("/training/runs")
-def create_training_run(request: TrainingRequest, background_tasks: BackgroundTasks):
+def create_training_run(
+    request: TrainingRequest,
+    background_tasks: BackgroundTasks,
+    _: dict = Depends(get_current_admin),
+):
     request = materialize_training_request(request)
     run_record = create_training_run_record(request)
     background_tasks.add_task(run_training_job, run_record["id"], request)
@@ -176,12 +200,12 @@ def create_training_run(request: TrainingRequest, background_tasks: BackgroundTa
 
 
 @app.get("/training/runs")
-def training_runs():
+def training_runs(_: dict = Depends(get_current_admin)):
     return list_training_runs()
 
 
 @app.get("/training/runs/{run_id}")
-def training_run_detail(run_id: int):
+def training_run_detail(run_id: int, _: dict = Depends(get_current_admin)):
     run_record = get_training_run(run_id)
     if run_record is None:
         raise HTTPException(status_code=404, detail="Training run not found")
@@ -189,7 +213,7 @@ def training_run_detail(run_id: int):
 
 
 @app.get("/models")
-def models():
+def models(_: dict = Depends(get_current_admin)):
     return list_models()
 
 
@@ -202,7 +226,7 @@ def active_model():
 
 
 @app.post("/models/{model_id}/activate")
-def activate_model_endpoint(model_id: int):
+def activate_model_endpoint(model_id: int, _: dict = Depends(get_current_admin)):
     model = get_model_or_none(model_id)
     if model is None:
         raise HTTPException(status_code=404, detail="Model not found")
@@ -214,7 +238,7 @@ def activate_model_endpoint(model_id: int):
 
 
 @app.get("/models/{model_id}/evaluation")
-def model_evaluation(model_id: int):
+def model_evaluation(model_id: int, _: dict = Depends(get_current_admin)):
     model = get_model_or_none(model_id)
     if model is None:
         raise HTTPException(status_code=404, detail="Model not found")
