@@ -2,6 +2,16 @@ import { Button, Space, Table, Tag } from "antd";
 import { CheckCircleOutlined } from "@ant-design/icons";
 import { PageSection } from "../../../app/shared/PageSection";
 
+function getLastLoss(metrics) {
+  const history = metrics?.loss_history;
+  if (!Array.isArray(history) || history.length === 0) {
+    return "-";
+  }
+
+  const value = history[history.length - 1]?.loss;
+  return typeof value === "number" ? value.toFixed(3) : "-";
+}
+
 const columns = (onActivate, loading) => [
   { title: "ID", dataIndex: "id", key: "id", width: 80 },
   { title: "Display Name", dataIndex: "display_name", key: "display_name", width: 220 },
@@ -28,6 +38,13 @@ const columns = (onActivate, loading) => [
     key: "class_names",
     width: 120,
     render: (value) => `${value?.length ?? 0} kelas`,
+  },
+  {
+    title: "Loss Akhir",
+    dataIndex: "metrics",
+    key: "loss_final",
+    width: 110,
+    render: (metrics) => getLastLoss(metrics),
   },
   {
     title: "Action",
