@@ -370,7 +370,7 @@ Kenapa ini penting:
 - membantu menjawab pertanyaan dosen tentang alur Vision Transformer
 
 ### Step 22 — Optimasi endpoint dataset dengan cache
-Status: `pending`
+Status: `done`
 
 Target:
 - tambahkan cache untuk endpoint dataset summary dan dataset validation
@@ -383,6 +383,11 @@ Output selesai:
 Kenapa ini penting:
 - scan dataset saat ini terasa lambat pada endpoint summary dan validation
 - pengalaman frontend menjadi buruk jika setiap refresh harus menunggu terlalu lama
+
+Implementasi:
+- summary dan validation dataset disimpan sebagai snapshot di SQLite
+- endpoint read normal mengambil data dari database, bukan scan folder ulang
+- tombol `Refresh Dataset` memicu rescan manual lalu overwrite snapshot di database
 
 ### Step 23 — Eksekusi training final di cloud GPU
 Status: `pending`

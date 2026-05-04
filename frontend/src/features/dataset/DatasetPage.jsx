@@ -7,8 +7,17 @@ import { DatasetValidationPanel } from "./components/DatasetValidationPanel";
 import { useDatasetOverview } from "./hooks/useDatasetOverview";
 
 export function DatasetPage() {
-  const { classes, summary, validation, isLoading, isError, errors, refetchAll } =
-    useDatasetOverview();
+  const {
+    classes,
+    summary,
+    validation,
+    isLoading,
+    isError,
+    errors,
+    refetchAll,
+    refreshDatasetCache,
+    isRefreshingDatasetCache,
+  } = useDatasetOverview();
 
   if (isLoading) {
     return (
@@ -46,7 +55,11 @@ export function DatasetPage() {
       </div>
 
       <Space wrap>
-        <Button icon={<ReloadOutlined />} onClick={refetchAll}>
+        <Button
+          icon={<ReloadOutlined />}
+          onClick={() => refreshDatasetCache()}
+          loading={isRefreshingDatasetCache}
+        >
           Refresh Dataset
         </Button>
       </Space>

@@ -11,13 +11,16 @@ import torch
 from app.inference import Predictor
 from app.schemas import PredictionResponse, TrainingRequest
 from config import CLASS_NAMES, CORS_ALLOW_ORIGINS, SCORE_THRESHOLD
-from dataset_scan import (
-    build_class_lookup,
-    compute_dataset_signature,
-    scan_dataset,
-    validate_dataset,
+from dataset_scan import build_class_lookup, scan_dataset, validate_dataset
+from db import (
+    get_active_model,
+    get_dataset_cache,
+    get_training_run,
+    init_db,
+    list_models,
+    list_training_runs,
+    upsert_dataset_cache,
 )
-from db import get_active_model, get_training_run, init_db, list_models, list_training_runs
 from model_registry import activate_model, ensure_default_model_registered, get_model_or_none, resolve_active_model_path
 from training_service import (
     create_training_run_record,
@@ -37,9 +40,6 @@ app.add_middleware(
 
 predictor: Predictor | None = None
 active_model_cache: dict | None = None
-dataset_summary_cache: dict | None = None
-dataset_validation_cache: dict | None = None
-dataset_cache_signature: tuple[int, int, int] | None = None
 
 
 def _device() -> torch.device:
@@ -57,20 +57,30 @@ def reload_active_predictor() -> None:
     predictor = Predictor(model_path, active_model["class_names"] or CLASS_NAMES, _device())
 
 
-def _refresh_dataset_cache_if_needed() -> None:
-    global dataset_summary_cache, dataset_validation_cache, dataset_cache_signature
+def refresh_dataset_cache() -> dict:
+    summary = scan_dataset()
+    validation = validate_dataset()
+    summary_cache = upsert_dataset_cache("summary", summary)
+    validation_cache = upsert_dataset_cache("validation", validation)
+    return {
+        "summary": summary_cache["payload"],
+        "validation": validation_cache["payload"],
+        "updated_at": max(summary_cache["updated_at"], validation_cache["updated_at"]),
+    }
 
-    next_signature = compute_dataset_signature()
-    if (
-        dataset_summary_cache is not None
-        and dataset_validation_cache is not None
-        and dataset_cache_signature == next_signature
-    ):
-        return
 
-    dataset_summary_cache = scan_dataset()
-    dataset_validation_cache = validate_dataset()
-    dataset_cache_signature = next_signature
+def get_dataset_cache_payload(cache_key: str, *, refresh_if_missing: bool = True) -> dict:
+    cached = get_dataset_cache(cache_key)
+    if cached is not None:
+        return cached["payload"]
+
+    if refresh_if_missing:
+        refresh_dataset_cache()
+        cached = get_dataset_cache(cache_key)
+        if cached is not None:
+            return cached["payload"]
+
+    raise HTTPException(status_code=500, detail=f"Dataset cache '{cache_key}' is not available")
 
 
 def run_training_job(run_id: int, request: TrainingRequest) -> None:
@@ -84,6 +94,7 @@ def startup() -> None:
     init_db()
     ensure_default_model_registered()
     reload_active_predictor()
+    refresh_dataset_cache()
 
 
 @app.get("/health")
@@ -102,14 +113,17 @@ def dataset_classes():
 
 @app.get("/dataset/summary")
 def dataset_summary():
-    _refresh_dataset_cache_if_needed()
-    return dataset_summary_cache
+    return get_dataset_cache_payload("summary")
 
 
 @app.get("/dataset/validation")
 def dataset_validation():
-    _refresh_dataset_cache_if_needed()
-    return dataset_validation_cache
+    return get_dataset_cache_payload("validation")
+
+
+@app.post("/dataset/refresh")
+def dataset_refresh():
+    return refresh_dataset_cache()
 
 
 @app.get("/training/config")

@@ -70,6 +70,16 @@ def init_db(db_path: Path = REGISTRY_DB_PATH) -> None:
             )
             """
         )
+        connection.execute(
+            """
+            CREATE TABLE IF NOT EXISTS dataset_cache (
+                cache_key TEXT PRIMARY KEY,
+                payload_json TEXT NOT NULL,
+                created_at TEXT NOT NULL,
+                updated_at TEXT NOT NULL
+            )
+            """
+        )
 
 
 def _json_dump(value: Any) -> str:
@@ -304,3 +314,48 @@ def update_training_run(
             ),
         )
     return get_training_run(run_id)
+
+
+def get_dataset_cache(cache_key: str) -> dict | None:
+    with get_connection() as connection:
+        row = connection.execute(
+            "SELECT * FROM dataset_cache WHERE cache_key = ?",
+            (cache_key,),
+        ).fetchone()
+
+    if row is None:
+        return None
+
+    return {
+        "cache_key": row["cache_key"],
+        "payload": json.loads(row["payload_json"]),
+        "created_at": row["created_at"],
+        "updated_at": row["updated_at"],
+    }
+
+
+def upsert_dataset_cache(cache_key: str, payload: dict) -> dict:
+    existing = get_dataset_cache(cache_key)
+    now = utc_now()
+
+    with get_connection() as connection:
+        if existing is None:
+            connection.execute(
+                """
+                INSERT INTO dataset_cache (
+                    cache_key, payload_json, created_at, updated_at
+                ) VALUES (?, ?, ?, ?)
+                """,
+                (cache_key, _json_dump(payload), now, now),
+            )
+        else:
+            connection.execute(
+                """
+                UPDATE dataset_cache
+                SET payload_json = ?, updated_at = ?
+                WHERE cache_key = ?
+                """,
+                (_json_dump(payload), now, cache_key),
+            )
+
+    return get_dataset_cache(cache_key)
