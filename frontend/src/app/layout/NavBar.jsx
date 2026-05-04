@@ -3,6 +3,7 @@ import {
   DashboardOutlined,
   RadarChartOutlined,
   RocketOutlined,
+  ReadOutlined,
 } from "@ant-design/icons";
 import { Layout, Menu, Typography } from "antd";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -14,6 +15,7 @@ const menuItems = [
   { key: "/dataset", icon: <DatabaseOutlined />, label: "Dataset" },
   { key: "/training", icon: <RocketOutlined />, label: "Training & Model" },
   { key: "/prediction", icon: <RadarChartOutlined />, label: "Prediksi" },
+  { key: "/guide", icon: <ReadOutlined />, label: "User Guide" },
 ];
 
 export function AppNavBar() {

@@ -22,6 +22,8 @@ function App() {
                   ? "Training & Model Workspace"
                   : location.pathname === "/prediction"
                     ? "Prediction Workspace"
+                    : location.pathname === "/guide"
+                      ? "Panduan Penggunaan Aplikasi"
                     : "Implementasi Aplikasi Skripsi"}
             </Typography.Title>
           </div>

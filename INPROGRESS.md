@@ -294,7 +294,7 @@ Kenapa ini dipilih:
 - tetap sesuai batasan input gambar statis untuk skripsi
 
 ### Step 19 — Tambahkan halaman User Guide
-Status: `pending`
+Status: `done`
 
 Target:
 - buat halaman panduan penggunaan aplikasi
