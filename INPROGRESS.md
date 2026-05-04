@@ -277,7 +277,7 @@ Kenapa ini penting:
 - Docker saat ini belum otomatis membawa dataset lokal ke server cloud
 
 ### Step 18 — Tambahkan prediksi dari kamera
-Status: `pending`
+Status: `done`
 
 Target:
 - akses kamera dari browser

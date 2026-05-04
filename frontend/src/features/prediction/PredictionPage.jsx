@@ -21,37 +21,59 @@ export function PredictionPage() {
     resetPrediction,
   } = usePredictionWorkspace();
   const [fileList, setFileList] = useState([]);
+  const [inputMode, setInputMode] = useState("upload");
+  const [selectedFile, setSelectedFile] = useState(null);
   const [scoreThreshold, setScoreThreshold] = useState(0.5);
   const [pendingImageUrl, setPendingImageUrl] = useState(null);
   const [predictionImageUrl, setPredictionImageUrl] = useState(null);
+  const [cameraResetSignal, setCameraResetSignal] = useState(0);
 
   useEffect(() => {
-    if (fileList.length === 0) {
+    if (!selectedFile) {
       setPendingImageUrl(null);
       return undefined;
     }
 
-    const nextUrl = URL.createObjectURL(fileList[0].originFileObj ?? fileList[0]);
+    const nextUrl = URL.createObjectURL(selectedFile);
     setPendingImageUrl(nextUrl);
 
     return () => {
       URL.revokeObjectURL(nextUrl);
     };
-  }, [fileList]);
+  }, [selectedFile]);
 
   const handlePredict = async () => {
-    if (fileList.length === 0) {
+    if (!selectedFile) {
       return;
     }
-    const file = fileList[0].originFileObj ?? fileList[0];
-    await runPrediction({ file, scoreThreshold });
+    await runPrediction({ file: selectedFile, scoreThreshold });
     setPredictionImageUrl(pendingImageUrl);
+  };
+
+  const handleInputModeChange = (nextMode) => {
+    setInputMode(nextMode);
+    setFileList([]);
+    setSelectedFile(null);
+    setCameraResetSignal((value) => value + 1);
+  };
+
+  const handleUploadChange = ({ fileList: nextFileList }) => {
+    setFileList(nextFileList);
+    const nextFile = nextFileList[0]?.originFileObj ?? nextFileList[0] ?? null;
+    setSelectedFile(nextFile);
+  };
+
+  const handleCameraCapture = (file) => {
+    setFileList([]);
+    setSelectedFile(file);
   };
 
   const handleClear = () => {
     setFileList([]);
+    setSelectedFile(null);
     setScoreThreshold(0.5);
     setPredictionImageUrl(null);
+    setCameraResetSignal((value) => value + 1);
     resetPrediction();
   };
 
@@ -111,13 +133,18 @@ export function PredictionPage() {
         </Col>
         <Col xs={24} xl={15} className="prediction-grid-col">
           <PredictionControlPanel
+            inputMode={inputMode}
+            onInputModeChange={handleInputModeChange}
             fileList={fileList}
+            selectedFile={selectedFile}
             scoreThreshold={scoreThreshold}
-            onFileChange={({ fileList: nextFileList }) => setFileList(nextFileList)}
+            onFileChange={handleUploadChange}
             onThresholdChange={setScoreThreshold}
             onPredict={handlePredict}
             isPredicting={isPredicting}
             onClear={handleClear}
+            onCameraCapture={handleCameraCapture}
+            cameraResetSignal={cameraResetSignal}
           />
         </Col>
       </Row>

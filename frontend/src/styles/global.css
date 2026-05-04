@@ -83,6 +83,27 @@ body {
   padding-block: 20px !important;
 }
 
+.prediction-camera-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.prediction-camera-frame {
+  overflow: hidden;
+  border-radius: 16px;
+  background: #0f172a;
+  border: 1px solid rgba(15, 118, 110, 0.14);
+}
+
+.prediction-camera-video {
+  display: block;
+  width: 100%;
+  min-height: 240px;
+  max-height: 320px;
+  object-fit: cover;
+}
+
 .prediction-inline-form .ant-form-item-label {
   padding-bottom: 6px;
 }
