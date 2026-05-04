@@ -19,6 +19,7 @@ from db import (
     init_db,
     list_models,
     list_training_runs,
+    utc_now,
     upsert_dataset_cache,
 )
 from model_registry import activate_model, ensure_default_model_registered, get_model_or_none, resolve_active_model_path
@@ -40,6 +41,12 @@ app.add_middleware(
 
 predictor: Predictor | None = None
 active_model_cache: dict | None = None
+dataset_refresh_state = {
+    "is_refreshing": False,
+    "last_started_at": None,
+    "last_completed_at": None,
+    "last_error": None,
+}
 
 
 def _device() -> torch.device:
@@ -67,6 +74,20 @@ def refresh_dataset_cache() -> dict:
         "validation": validation_cache["payload"],
         "updated_at": max(summary_cache["updated_at"], validation_cache["updated_at"]),
     }
+
+
+def run_dataset_refresh_job() -> None:
+    dataset_refresh_state["is_refreshing"] = True
+    dataset_refresh_state["last_started_at"] = utc_now()
+    dataset_refresh_state["last_error"] = None
+
+    try:
+        refresh_dataset_cache()
+        dataset_refresh_state["last_completed_at"] = utc_now()
+    except Exception as exc:
+        dataset_refresh_state["last_error"] = str(exc)
+    finally:
+        dataset_refresh_state["is_refreshing"] = False
 
 
 def get_dataset_cache_payload(cache_key: str, *, refresh_if_missing: bool = True) -> dict:
@@ -122,8 +143,19 @@ def dataset_validation():
 
 
 @app.post("/dataset/refresh")
-def dataset_refresh():
-    return refresh_dataset_cache()
+def dataset_refresh(background_tasks: BackgroundTasks):
+    if dataset_refresh_state["is_refreshing"]:
+        return {
+            "status": "running",
+            "message": "Dataset refresh is already running in the background.",
+            "last_started_at": dataset_refresh_state["last_started_at"],
+        }
+
+    background_tasks.add_task(run_dataset_refresh_job)
+    return {
+        "status": "queued",
+        "message": "Dataset refresh has started in the background.",
+    }
 
 
 @app.get("/training/config")

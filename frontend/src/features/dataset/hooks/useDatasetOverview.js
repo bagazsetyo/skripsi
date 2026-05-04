@@ -1,9 +1,8 @@
-import { useMutation, useQueries, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueries } from "@tanstack/react-query";
 import { message } from "antd";
 import { datasetApi } from "../api/datasetApi";
 
 export function useDatasetOverview() {
-  const queryClient = useQueryClient();
   const [classesQuery, summaryQuery, validationQuery] = useQueries({
     queries: [
       { queryKey: ["dataset", "classes"], queryFn: datasetApi.getClasses },
@@ -14,12 +13,13 @@ export function useDatasetOverview() {
 
   const refreshCacheMutation = useMutation({
     mutationFn: datasetApi.refreshCache,
-    onSuccess: async () => {
-      message.success("Cache dataset berhasil diperbarui");
-      await Promise.all([
-        queryClient.invalidateQueries({ queryKey: ["dataset", "summary"] }),
-        queryClient.invalidateQueries({ queryKey: ["dataset", "validation"] }),
-      ]);
+    onSuccess: (response) => {
+      const isRunning = response?.status === "running";
+      message.success(
+        isRunning
+          ? "Refresh dataset sedang berjalan di background"
+          : "Refresh dataset dimulai di background"
+      );
     },
     onError: (error) => {
       message.error(error?.message || "Gagal memperbarui cache dataset");
