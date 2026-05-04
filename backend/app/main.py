@@ -11,7 +11,12 @@ import torch
 from app.inference import Predictor
 from app.schemas import PredictionResponse, TrainingRequest
 from config import CLASS_NAMES, CORS_ALLOW_ORIGINS, SCORE_THRESHOLD
-from dataset_scan import build_class_lookup, scan_dataset, validate_dataset
+from dataset_scan import (
+    build_class_lookup,
+    compute_dataset_signature,
+    scan_dataset,
+    validate_dataset,
+)
 from db import get_active_model, get_training_run, init_db, list_models, list_training_runs
 from model_registry import activate_model, ensure_default_model_registered, get_model_or_none, resolve_active_model_path
 from training_service import (
@@ -32,6 +37,9 @@ app.add_middleware(
 
 predictor: Predictor | None = None
 active_model_cache: dict | None = None
+dataset_summary_cache: dict | None = None
+dataset_validation_cache: dict | None = None
+dataset_cache_signature: tuple[int, int, int] | None = None
 
 
 def _device() -> torch.device:
@@ -47,6 +55,22 @@ def reload_active_predictor() -> None:
         return
 
     predictor = Predictor(model_path, active_model["class_names"] or CLASS_NAMES, _device())
+
+
+def _refresh_dataset_cache_if_needed() -> None:
+    global dataset_summary_cache, dataset_validation_cache, dataset_cache_signature
+
+    next_signature = compute_dataset_signature()
+    if (
+        dataset_summary_cache is not None
+        and dataset_validation_cache is not None
+        and dataset_cache_signature == next_signature
+    ):
+        return
+
+    dataset_summary_cache = scan_dataset()
+    dataset_validation_cache = validate_dataset()
+    dataset_cache_signature = next_signature
 
 
 def run_training_job(run_id: int, request: TrainingRequest) -> None:
@@ -78,12 +102,14 @@ def dataset_classes():
 
 @app.get("/dataset/summary")
 def dataset_summary():
-    return scan_dataset()
+    _refresh_dataset_cache_if_needed()
+    return dataset_summary_cache
 
 
 @app.get("/dataset/validation")
 def dataset_validation():
-    return validate_dataset()
+    _refresh_dataset_cache_if_needed()
+    return dataset_validation_cache
 
 
 @app.get("/training/config")

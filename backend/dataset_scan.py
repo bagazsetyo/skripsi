@@ -323,6 +323,23 @@ def build_class_lookup() -> list[dict]:
     ]
 
 
+def compute_dataset_signature(root_dir: Path = DATA_DIR) -> tuple[int, int, int]:
+    file_count = 0
+    latest_mtime_ns = 0
+    total_size = 0
+
+    for path in root_dir.rglob("*"):
+        if not path.is_file():
+            continue
+
+        stat = path.stat()
+        file_count += 1
+        total_size += stat.st_size
+        latest_mtime_ns = max(latest_mtime_ns, stat.st_mtime_ns)
+
+    return file_count, latest_mtime_ns, total_size
+
+
 if __name__ == "__main__":
     import json
 

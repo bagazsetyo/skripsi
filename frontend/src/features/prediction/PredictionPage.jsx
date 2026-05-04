@@ -1,4 +1,4 @@
-import { Alert, Button, Result, Space, Spin, Typography } from "antd";
+import { Alert, Button, Result, Spin, Typography } from "antd";
 import { ReloadOutlined } from "@ant-design/icons";
 import { useEffect, useState } from "react";
 import { ActivePredictionModelCard } from "./components/ActivePredictionModelCard";
@@ -84,12 +84,6 @@ export function PredictionPage() {
         </Typography.Paragraph>
       </div>
 
-      <Space wrap>
-        <Button icon={<ReloadOutlined />} onClick={refetchModel}>
-          Refresh Model Aktif
-        </Button>
-      </Space>
-
       <ActivePredictionModelCard activeModel={activeModel} onRefresh={refetchModel} />
 
       <PredictionControlPanel
@@ -102,9 +96,12 @@ export function PredictionPage() {
         onClear={handleClear}
       />
 
-      <PredictionPreviewPanel imageUrl={imageUrl} predictionResult={predictionResult} />
-
-      <PredictionResultsTable predictionResult={predictionResult} />
+      {predictionResult ? (
+        <>
+          <PredictionPreviewPanel imageUrl={imageUrl} predictionResult={predictionResult} />
+          <PredictionResultsTable predictionResult={predictionResult} />
+        </>
+      ) : null}
 
       <Alert
         type="success"
