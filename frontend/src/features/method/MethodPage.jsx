@@ -1,5 +1,6 @@
-import { Alert, Card, Col, Collapse, Row, Steps, Tag, Typography } from "antd";
+import { Alert, Button, Card, Col, Collapse, Row, Steps, Tag, Typography } from "antd";
 import { BulbOutlined, InfoCircleOutlined } from "@ant-design/icons";
+import { Link } from "react-router-dom";
 import { PageSection } from "../../app/shared/PageSection";
 import {
   analogies,
@@ -65,6 +66,36 @@ export function MethodPage() {
         message="Ringkasan sederhana"
         description="Sistem menerima gambar, membagi gambar menjadi bagian-bagian kecil, mempelajari hubungan antarbagian dengan transformer, lalu menentukan jenis rambu dan letaknya pada gambar."
       />
+
+      <PageSection
+        title="Navigasi Cepat"
+        subtitle="Gunakan tombol ini jika ingin berpindah dari penjelasan metode ke halaman praktik."
+      >
+        <Row gutter={[16, 16]}>
+          <Col xs={24} md={12}>
+            <div className="public-shortcut-card">
+              <Typography.Title level={5}>Kembali ke User Guide</Typography.Title>
+              <Typography.Paragraph type="secondary">
+                Cocok jika Anda ingin melihat fungsi menu dan alur penggunaan aplikasi.
+              </Typography.Paragraph>
+              <Button>
+                <Link to="/guide">Buka User Guide</Link>
+              </Button>
+            </div>
+          </Col>
+          <Col xs={24} md={12}>
+            <div className="public-shortcut-card">
+              <Typography.Title level={5}>Langsung Uji Prediksi</Typography.Title>
+              <Typography.Paragraph type="secondary">
+                Setelah memahami konsep YOLOS, Anda bisa langsung mencoba hasil prediksi pada gambar.
+              </Typography.Paragraph>
+              <Button type="primary">
+                <Link to="/prediction">Buka Halaman Prediksi</Link>
+              </Button>
+            </div>
+          </Col>
+        </Row>
+      </PageSection>
 
       <PageSection
         title="Gambaran Umum"

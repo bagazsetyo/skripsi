@@ -1,6 +1,7 @@
-import { Alert, Button, Col, Result, Row, Spin, Typography } from "antd";
+import { Alert, Button, Col, Result, Row, Space, Spin, Typography } from "antd";
 import { ReloadOutlined } from "@ant-design/icons";
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import { ActivePredictionModelCard } from "./components/ActivePredictionModelCard";
 import { PredictionControlPanel } from "./components/PredictionControlPanel";
 import { PredictionPreviewPanel } from "./components/PredictionPreviewPanel";
@@ -83,9 +84,26 @@ export function PredictionPage() {
       <div>
         <Typography.Title level={2}>Prediksi</Typography.Title>
         <Typography.Paragraph type="secondary">
-          Halaman ini akan menjadi area upload gambar, preview, dan hasil deteksi bounding box.
+          Gunakan halaman ini untuk menguji model dengan satu gambar statis. Sistem akan
+          menampilkan lokasi rambu, nama kelas, dan confidence dari hasil deteksi.
         </Typography.Paragraph>
       </div>
+
+      <Alert
+        type="info"
+        showIcon
+        message="Alur singkat"
+        description="Pilih gambar, atur threshold jika perlu, lalu tekan `Jalankan Prediksi`. Hasil akan muncul setelah backend selesai memproses gambar."
+      />
+
+      <Space wrap>
+        <Button>
+          <Link to="/guide">Buka User Guide</Link>
+        </Button>
+        <Button>
+          <Link to="/method">Lihat Cara Kerja YOLOS</Link>
+        </Button>
+      </Space>
 
       <Row gutter={[16, 16]} align="stretch">
         <Col xs={24} xl={9} className="prediction-grid-col">

@@ -61,8 +61,18 @@ export function PredictionControlPanel({
           <Button onClick={onClear}>Reset</Button>
         </Space>
 
+        {fileList.length > 0 ? (
+          <Typography.Text className="prediction-selected-file">
+            File terpilih: {fileList[0]?.name ?? fileList[0]?.originFileObj?.name ?? "gambar"}
+          </Typography.Text>
+        ) : null}
+
         <Typography.Text type="secondary">
           Threshold yang lebih tinggi akan menampilkan deteksi yang lebih selektif.
+        </Typography.Text>
+        <Typography.Text type="secondary">
+          Jika Anda mengganti file gambar, hasil preview lama tetap dipertahankan sampai tombol
+          `Jalankan Prediksi` ditekan lagi.
         </Typography.Text>
       </Space>
     </PageSection>

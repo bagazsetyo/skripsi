@@ -1,5 +1,6 @@
-import { Alert, Col, Collapse, Divider, List, Row, Steps, Tag, Typography } from "antd";
+import { Alert, Button, Col, Collapse, Divider, List, Row, Steps, Tag, Typography } from "antd";
 import { BookOutlined, InfoCircleOutlined } from "@ant-design/icons";
+import { Link } from "react-router-dom";
 import { PageSection } from "../../app/shared/PageSection";
 import { menuGuideDetails, predictionTips, quickStartSteps } from "./guideContent";
 
@@ -105,6 +106,47 @@ export function UserGuidePage() {
         message="Tujuan penggunaan aplikasi"
         description="Aplikasi ini dipakai untuk mengelola dataset, melakukan training model YOLOS, memilih model aktif, dan menguji hasil prediksi rambu lalu lintas Indonesia."
       />
+
+      <PageSection
+        title="Mulai Dari Mana?"
+        subtitle="Jika ini pertama kalinya membuka aplikasi, tiga tombol ini adalah jalur paling aman untuk memahami sistem."
+      >
+        <Row gutter={[16, 16]}>
+          <Col xs={24} md={8}>
+            <div className="public-shortcut-card">
+              <Typography.Title level={5}>Pelajari Alurnya</Typography.Title>
+              <Typography.Paragraph type="secondary">
+                Mulai dari panduan ini untuk memahami fungsi setiap menu dan komponen.
+              </Typography.Paragraph>
+              <Button type="primary">
+                <Link to="/guide">Tetap di User Guide</Link>
+              </Button>
+            </div>
+          </Col>
+          <Col xs={24} md={8}>
+            <div className="public-shortcut-card">
+              <Typography.Title level={5}>Pahami Metodenya</Typography.Title>
+              <Typography.Paragraph type="secondary">
+                Buka penjelasan YOLOS jika ingin memahami logika model dengan bahasa sederhana.
+              </Typography.Paragraph>
+              <Button>
+                <Link to="/method">Lihat Cara Kerja YOLOS</Link>
+              </Button>
+            </div>
+          </Col>
+          <Col xs={24} md={8}>
+            <div className="public-shortcut-card">
+              <Typography.Title level={5}>Coba Prediksi</Typography.Title>
+              <Typography.Paragraph type="secondary">
+                Setelah memahami alurnya, langsung uji model menggunakan gambar statis.
+              </Typography.Paragraph>
+              <Button>
+                <Link to="/prediction">Buka Halaman Prediksi</Link>
+              </Button>
+            </div>
+          </Col>
+        </Row>
+      </PageSection>
 
       <PageSection
         title="Alur Penggunaan Singkat"

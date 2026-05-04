@@ -87,6 +87,11 @@ body {
   padding-bottom: 6px;
 }
 
+.prediction-selected-file {
+  color: #0f766e;
+  font-weight: 500;
+}
+
 .prediction-compact-descriptions .ant-descriptions-row > th,
 .prediction-compact-descriptions .ant-descriptions-row > td {
   padding-bottom: 10px !important;
