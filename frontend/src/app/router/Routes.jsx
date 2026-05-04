@@ -5,6 +5,7 @@ import { DatasetPage } from "../../features/dataset/DatasetPage";
 import { TrainingPage } from "../../features/training/TrainingPage";
 import { PredictionPage } from "../../features/prediction/PredictionPage";
 import { UserGuidePage } from "../../features/guide/UserGuidePage";
+import { MethodPage } from "../../features/method/MethodPage";
 import { NotFoundPage } from "../../features/errors/NotFoundPage";
 
 export const router = createBrowserRouter([
@@ -18,6 +19,7 @@ export const router = createBrowserRouter([
       { path: "training", element: <TrainingPage /> },
       { path: "prediction", element: <PredictionPage /> },
       { path: "guide", element: <UserGuidePage /> },
+      { path: "method", element: <MethodPage /> },
       { path: "*", element: <NotFoundPage /> },
     ],
   },

@@ -336,7 +336,7 @@ Kenapa ini penting:
 - menjaga fitur prediksi tetap mudah diakses publik
 
 ### Step 21 — Tambahkan halaman penjelasan Vision Transformer / YOLOS
-Status: `pending`
+Status: `done`
 
 Target:
 - buat halaman penjelasan ringkas namun teknis tentang alur kerja model

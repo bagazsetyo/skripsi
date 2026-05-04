@@ -1,6 +1,7 @@
 import {
   DatabaseOutlined,
   DashboardOutlined,
+  DeploymentUnitOutlined,
   RadarChartOutlined,
   RocketOutlined,
   ReadOutlined,
@@ -16,6 +17,7 @@ const menuItems = [
   { key: "/training", icon: <RocketOutlined />, label: "Training & Model" },
   { key: "/prediction", icon: <RadarChartOutlined />, label: "Prediksi" },
   { key: "/guide", icon: <ReadOutlined />, label: "User Guide" },
+  { key: "/method", icon: <DeploymentUnitOutlined />, label: "Cara Kerja YOLOS" },
 ];
 
 export function AppNavBar() {
