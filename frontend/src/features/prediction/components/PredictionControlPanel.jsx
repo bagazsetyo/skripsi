@@ -16,8 +16,9 @@ export function PredictionControlPanel({
       title="Kontrol Prediksi"
       subtitle="Pilih satu gambar statis, atur threshold, lalu jalankan prediksi."
     >
-      <Space direction="vertical" size={16} style={{ width: "100%" }}>
+      <Space direction="vertical" size={14} style={{ width: "100%" }}>
         <Upload.Dragger
+          className="prediction-uploader-compact"
           accept="image/*"
           beforeUpload={() => false}
           multiple={false}
@@ -34,8 +35,8 @@ export function PredictionControlPanel({
           </p>
         </Upload.Dragger>
 
-        <Form layout="vertical">
-          <Form.Item label="Score Threshold">
+        <Form layout="vertical" className="prediction-inline-form">
+          <Form.Item label="Score Threshold" style={{ marginBottom: 0 }}>
             <InputNumber
               min={0}
               max={1}

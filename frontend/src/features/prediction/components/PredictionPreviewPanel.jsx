@@ -24,7 +24,7 @@ export function PredictionPreviewPanel({ imageUrl, predictionResult }) {
       {!imageUrl ? (
         <Empty description="Belum ada gambar yang dipilih" />
       ) : (
-        <div className="prediction-preview-wrapper">
+        <div className="prediction-preview-wrapper prediction-preview-compact">
           <img src={imageUrl} alt="Preview prediksi" className="prediction-preview-image" />
           <div className="prediction-overlay">
             {detections.map((detection, index) => (

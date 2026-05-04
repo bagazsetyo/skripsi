@@ -13,7 +13,7 @@ export function ActivePredictionModelCard({ activeModel, onRefresh }) {
         </Button>
       }
     >
-      <Descriptions column={1} size="small">
+      <Descriptions column={1} size="small" className="prediction-compact-descriptions">
         <Descriptions.Item label="Display Name">
           {activeModel?.display_name ?? "-"}
         </Descriptions.Item>

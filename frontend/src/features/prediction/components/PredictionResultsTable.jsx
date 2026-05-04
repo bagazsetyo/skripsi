@@ -40,7 +40,7 @@ export function PredictionResultsTable({ predictionResult }) {
           dataSource={detections}
           pagination={{ pageSize: 5, showSizeChanger: false }}
           size="middle"
-          scroll={{ x: 900 }}
+          scroll={{ x: 700, y: 420 }}
         />
       )}
     </PageSection>

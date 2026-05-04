@@ -60,6 +60,29 @@ body {
   height: auto;
 }
 
+.prediction-preview-compact {
+  max-height: 520px;
+}
+
+.prediction-preview-compact .prediction-preview-image {
+  max-height: 520px;
+  object-fit: contain;
+  margin-inline: auto;
+}
+
+.prediction-uploader-compact .ant-upload {
+  padding-block: 20px !important;
+}
+
+.prediction-inline-form .ant-form-item-label {
+  padding-bottom: 6px;
+}
+
+.prediction-compact-descriptions .ant-descriptions-row > th,
+.prediction-compact-descriptions .ant-descriptions-row > td {
+  padding-bottom: 10px !important;
+}
+
 .prediction-overlay {
   position: absolute;
   inset: 0;

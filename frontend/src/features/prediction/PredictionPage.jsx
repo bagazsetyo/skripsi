@@ -1,4 +1,4 @@
-import { Alert, Button, Result, Spin, Typography } from "antd";
+import { Alert, Button, Col, Result, Row, Spin, Typography } from "antd";
 import { ReloadOutlined } from "@ant-design/icons";
 import { useEffect, useState } from "react";
 import { ActivePredictionModelCard } from "./components/ActivePredictionModelCard";
@@ -84,23 +84,32 @@ export function PredictionPage() {
         </Typography.Paragraph>
       </div>
 
-      <ActivePredictionModelCard activeModel={activeModel} onRefresh={refetchModel} />
-
-      <PredictionControlPanel
-        fileList={fileList}
-        scoreThreshold={scoreThreshold}
-        onFileChange={({ fileList: nextFileList }) => setFileList(nextFileList)}
-        onThresholdChange={setScoreThreshold}
-        onPredict={handlePredict}
-        isPredicting={isPredicting}
-        onClear={handleClear}
-      />
+      <Row gutter={[16, 16]}>
+        <Col xs={24} xl={9}>
+          <ActivePredictionModelCard activeModel={activeModel} onRefresh={refetchModel} />
+        </Col>
+        <Col xs={24} xl={15}>
+          <PredictionControlPanel
+            fileList={fileList}
+            scoreThreshold={scoreThreshold}
+            onFileChange={({ fileList: nextFileList }) => setFileList(nextFileList)}
+            onThresholdChange={setScoreThreshold}
+            onPredict={handlePredict}
+            isPredicting={isPredicting}
+            onClear={handleClear}
+          />
+        </Col>
+      </Row>
 
       {predictionResult ? (
-        <>
-          <PredictionPreviewPanel imageUrl={imageUrl} predictionResult={predictionResult} />
-          <PredictionResultsTable predictionResult={predictionResult} />
-        </>
+        <Row gutter={[16, 16]}>
+          <Col xs={24} xl={12}>
+            <PredictionPreviewPanel imageUrl={imageUrl} predictionResult={predictionResult} />
+          </Col>
+          <Col xs={24} xl={12}>
+            <PredictionResultsTable predictionResult={predictionResult} />
+          </Col>
+        </Row>
       ) : null}
 
       <Alert
