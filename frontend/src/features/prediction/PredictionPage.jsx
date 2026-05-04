@@ -21,16 +21,17 @@ export function PredictionPage() {
   } = usePredictionWorkspace();
   const [fileList, setFileList] = useState([]);
   const [scoreThreshold, setScoreThreshold] = useState(0.5);
-  const [imageUrl, setImageUrl] = useState(null);
+  const [pendingImageUrl, setPendingImageUrl] = useState(null);
+  const [predictionImageUrl, setPredictionImageUrl] = useState(null);
 
   useEffect(() => {
     if (fileList.length === 0) {
-      setImageUrl(null);
+      setPendingImageUrl(null);
       return undefined;
     }
 
     const nextUrl = URL.createObjectURL(fileList[0].originFileObj ?? fileList[0]);
-    setImageUrl(nextUrl);
+    setPendingImageUrl(nextUrl);
 
     return () => {
       URL.revokeObjectURL(nextUrl);
@@ -43,11 +44,13 @@ export function PredictionPage() {
     }
     const file = fileList[0].originFileObj ?? fileList[0];
     await runPrediction({ file, scoreThreshold });
+    setPredictionImageUrl(pendingImageUrl);
   };
 
   const handleClear = () => {
     setFileList([]);
     setScoreThreshold(0.5);
+    setPredictionImageUrl(null);
     resetPrediction();
   };
 
@@ -84,11 +87,11 @@ export function PredictionPage() {
         </Typography.Paragraph>
       </div>
 
-      <Row gutter={[16, 16]}>
-        <Col xs={24} xl={9}>
+      <Row gutter={[16, 16]} align="stretch">
+        <Col xs={24} xl={9} className="prediction-grid-col">
           <ActivePredictionModelCard activeModel={activeModel} onRefresh={refetchModel} />
         </Col>
-        <Col xs={24} xl={15}>
+        <Col xs={24} xl={15} className="prediction-grid-col">
           <PredictionControlPanel
             fileList={fileList}
             scoreThreshold={scoreThreshold}
@@ -102,11 +105,14 @@ export function PredictionPage() {
       </Row>
 
       {predictionResult ? (
-        <Row gutter={[16, 16]}>
-          <Col xs={24} xl={12}>
-            <PredictionPreviewPanel imageUrl={imageUrl} predictionResult={predictionResult} />
+        <Row gutter={[16, 16]} align="stretch">
+          <Col xs={24} xl={12} className="prediction-grid-col">
+            <PredictionPreviewPanel
+              imageUrl={predictionImageUrl}
+              predictionResult={predictionResult}
+            />
           </Col>
-          <Col xs={24} xl={12}>
+          <Col xs={24} xl={12} className="prediction-grid-col">
             <PredictionResultsTable predictionResult={predictionResult} />
           </Col>
         </Row>
