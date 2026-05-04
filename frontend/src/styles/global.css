@@ -94,13 +94,15 @@ body {
   border-radius: 16px;
   background: #0f172a;
   border: 1px solid rgba(15, 118, 110, 0.14);
+  width: min(100%, 360px);
+  aspect-ratio: 1 / 1;
+  margin-inline: auto;
 }
 
 .prediction-camera-video {
   display: block;
   width: 100%;
-  min-height: 240px;
-  max-height: 320px;
+  height: 100%;
   object-fit: cover;
 }
 

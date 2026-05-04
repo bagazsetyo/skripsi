@@ -1,4 +1,4 @@
-import { Alert, Button, Col, Result, Row, Space, Spin, Typography } from "antd";
+import { Alert, Button, Col, Result, Row, Space, Spin, Typography, message } from "antd";
 import { ReloadOutlined } from "@ant-design/icons";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
@@ -61,11 +61,15 @@ export function PredictionPage() {
     setFileList(nextFileList);
     const nextFile = nextFileList[0]?.originFileObj ?? nextFileList[0] ?? null;
     setSelectedFile(nextFile);
+    if (nextFile) {
+      message.success("Gambar berhasil dipilih");
+    }
   };
 
   const handleCameraCapture = (file) => {
     setFileList([]);
     setSelectedFile(file);
+    message.success("Foto dari kamera berhasil diambil");
   };
 
   const handleClear = () => {
