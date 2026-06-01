@@ -108,11 +108,13 @@ Catatan:
 - ini hanya alternatif kedua
 - dipilih bila opsi utama terlalu sulit atau tidak stabil
 - versi minimal backend/Python boleh dibuat dulu agar fungsi video cepat berjalan
+- versi minimal Python/OpenCV standalone boleh dibuat dulu agar demo realtime cepat tersedia
 - setelah versi minimal jalan, rapikan lagi:
   - UI halaman video
   - sinkronisasi istilah dan layout
   - kontrol start/stop dan status prediksi
   - integrasi ke alur aplikasi final bila nanti diperlukan
+  - evaluasi apakah demo realtime final akan memakai page backend atau script Python/OpenCV
 
 ## Prioritas 5 — Penulisan Skripsi
 

@@ -92,3 +92,29 @@ Response format:
   }
 ]
 ```
+
+## Real-Time Demo (Python + OpenCV)
+
+Jika ingin demo video langsung dari Python tanpa browser:
+
+```
+python backend/realtime_demo.py
+```
+
+Contoh memakai interval 0.5 detik:
+
+```
+python backend/realtime_demo.py --interval 0.5
+```
+
+Contoh memakai file video:
+
+```
+python backend/realtime_demo.py --video path/to/video.mp4 --interval 1.0
+```
+
+Catatan:
+- demo ini membuka kamera atau video langsung lewat OpenCV
+- inferensi berjalan pada worker thread terpisah
+- queue memakai `maxsize=1` agar frame lama dibuang dan tidak menumpuk
+- tekan `q` atau `Esc` untuk keluar
