@@ -107,6 +107,12 @@ Catatan:
 Catatan:
 - ini hanya alternatif kedua
 - dipilih bila opsi utama terlalu sulit atau tidak stabil
+- versi minimal backend/Python boleh dibuat dulu agar fungsi video cepat berjalan
+- setelah versi minimal jalan, rapikan lagi:
+  - UI halaman video
+  - sinkronisasi istilah dan layout
+  - kontrol start/stop dan status prediksi
+  - integrasi ke alur aplikasi final bila nanti diperlukan
 
 ## Prioritas 5 — Penulisan Skripsi
 

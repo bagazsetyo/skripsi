@@ -5,12 +5,14 @@ from pathlib import Path
 
 from fastapi import BackgroundTasks, Depends, FastAPI, File, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import HTMLResponse
 from PIL import Image
 import torch
 
 from app.auth import authenticate_admin, create_access_token, get_current_admin
 from app.inference import Predictor
 from app.schemas import LoginRequest, LoginResponse, PredictionResponse, TrainingRequest
+from app.video_demo import build_video_demo_html
 from config import CLASS_NAMES, CORS_ALLOW_ORIGINS, SCORE_THRESHOLD
 from dataset_scan import build_class_lookup, scan_dataset, validate_dataset
 from db import (
@@ -126,6 +128,11 @@ def health():
         "model_loaded": predictor is not None,
         "active_model": active_model_cache["version"] if active_model_cache else None,
     }
+
+
+@app.get("/video-demo", response_class=HTMLResponse)
+def video_demo():
+    return HTMLResponse(build_video_demo_html())
 
 
 @app.post("/auth/login", response_model=LoginResponse)
