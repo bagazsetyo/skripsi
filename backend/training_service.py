@@ -14,6 +14,43 @@ from evaluation import evaluate_model
 from training_core import build_model, train_one_epoch
 
 
+def _build_scheduler(
+    optimizer,
+    total_epochs: int,
+    warmup_epochs: int,
+    cosine_decay: bool,
+    lr_step: int,
+    lr_gamma: float,
+):
+    if warmup_epochs > 0 and cosine_decay:
+        # Linear warmup kemudian cosine annealing
+        def warmup_lr_lambda(epoch: int) -> float:
+            if epoch < warmup_epochs:
+                return float(epoch + 1) / float(warmup_epochs)
+            return 1.0
+
+        warmup_scheduler = torch.optim.lr_scheduler.LambdaLR(optimizer, lr_lambda=warmup_lr_lambda)
+        cosine_scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(
+            optimizer,
+            T_max=max(total_epochs - warmup_epochs, 1),
+            eta_min=1e-6,
+        )
+        return torch.optim.lr_scheduler.SequentialLR(
+            optimizer,
+            schedulers=[warmup_scheduler, cosine_scheduler],
+            milestones=[warmup_epochs],
+        )
+
+    if lr_step > 0:
+        return torch.optim.lr_scheduler.StepLR(
+            optimizer,
+            step_size=lr_step,
+            gamma=lr_gamma,
+        )
+
+    return None
+
+
 def build_output_version(request: TrainingRequest) -> str:
     if request.output_version:
         return request.output_version
@@ -77,13 +114,15 @@ def execute_training_run(run_id: int, request: TrainingRequest) -> dict | None:
             lr=request.learning_rate,
             weight_decay=request.weight_decay,
         )
-        scheduler = None
-        if request.lr_step > 0:
-            scheduler = torch.optim.lr_scheduler.StepLR(
-                optimizer,
-                step_size=request.lr_step,
-                gamma=request.lr_gamma,
-            )
+
+        scheduler = _build_scheduler(
+            optimizer=optimizer,
+            total_epochs=request.epochs,
+            warmup_epochs=request.warmup_epochs,
+            cosine_decay=request.cosine_decay,
+            lr_step=request.lr_step,
+            lr_gamma=request.lr_gamma,
+        )
 
         use_amp = request.use_amp and device.type == "cuda"
         scaler = torch.cuda.amp.GradScaler(enabled=use_amp)
@@ -98,6 +137,7 @@ def execute_training_run(run_id: int, request: TrainingRequest) -> dict | None:
                 device,
                 scaler,
                 use_amp,
+                grad_clip=request.grad_clip,
             )
             if scheduler is not None:
                 scheduler.step()

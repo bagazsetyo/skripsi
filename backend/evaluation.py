@@ -90,6 +90,10 @@ def evaluate_model(
                     }
                 )
 
+    # confusion_matrix[pred_class][gt_class] = jumlah prediksi pred_class yang match ke GT gt_class
+    n_classes = len(class_names)
+    confusion_matrix: list[list[int]] = [[0] * n_classes for _ in range(n_classes)]
+
     per_class_metrics: list[dict[str, Any]] = []
     ap_values: list[float] = []
     total_tp = 0
@@ -125,8 +129,26 @@ def evaluate_model(
                 tp[idx] = 1
                 matched_gt[key].add(best_gt_index)
                 matched_ious.append(best_iou)
+                # Catat di confusion matrix: prediksi class_id cocok ke GT class_id
+                confusion_matrix[class_id][class_id] += 1
             else:
                 fp[idx] = 1
+                # Coba cari GT kelas lain di gambar yang sama yang IoU-nya tinggi
+                # (prediksi benar secara lokasi tapi salah kelas)
+                best_cross_iou = 0.0
+                best_cross_gt_class = -1
+                for other_class_id in range(n_classes):
+                    if other_class_id == class_id:
+                        continue
+                    other_key = (prediction["image_id"], other_class_id)
+                    for gt_box in gt_by_image_class.get(other_key, []):
+                        iou = compute_iou(prediction["box"], gt_box)
+                        if iou > best_cross_iou:
+                            best_cross_iou = iou
+                            best_cross_gt_class = other_class_id
+                if best_cross_iou >= iou_threshold and best_cross_gt_class >= 0:
+                    # Prediksi class_id, tapi GT-nya best_cross_gt_class
+                    confusion_matrix[class_id][best_cross_gt_class] += 1
 
         tp_cumsum = np.cumsum(tp)
         fp_cumsum = np.cumsum(fp)
@@ -167,6 +189,21 @@ def evaluate_model(
         else 0.0
     )
 
+    # Bangun ringkasan konfusi antar kelas untuk kemudahan diagnosis
+    confusion_pairs: list[dict[str, Any]] = []
+    for pred_id in range(n_classes):
+        for gt_id in range(n_classes):
+            if pred_id == gt_id:
+                continue
+            count = confusion_matrix[pred_id][gt_id]
+            if count > 0:
+                confusion_pairs.append({
+                    "predicted_as": class_names[pred_id],
+                    "actual_class": class_names[gt_id],
+                    "count": count,
+                })
+    confusion_pairs.sort(key=lambda x: x["count"], reverse=True)
+
     return {
         "iou_threshold": iou_threshold,
         "score_threshold": score_threshold,
@@ -180,4 +217,6 @@ def evaluate_model(
         "mAP_50": float(np.mean(ap_values)) if ap_values else 0.0,
         "mean_iou": mean_iou,
         "per_class": per_class_metrics,
+        "confusion_matrix": confusion_matrix,
+        "confusion_pairs": confusion_pairs,
     }

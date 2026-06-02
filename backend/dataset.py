@@ -1,9 +1,10 @@
 from __future__ import annotations
 
+import random
 from pathlib import Path
 from typing import Dict, List, Tuple
 
-from PIL import Image
+from PIL import Image, ImageFilter
 
 IMAGE_EXTS = {".jpg", ".jpeg", ".png", ".bmp"}
 
@@ -73,10 +74,50 @@ def _yolo_to_xywh(values: List[float], width: int, height: int) -> List[float]:
     return [x_min, y_min, box_w * width, box_h * height]
 
 
+def _augment_image(image: Image.Image) -> Image.Image:
+    # ColorJitter: brightness, contrast, saturation, hue
+    brightness = random.uniform(0.7, 1.3)
+    contrast = random.uniform(0.7, 1.3)
+    saturation = random.uniform(0.8, 1.2)
+    hue_shift = random.uniform(-0.05, 0.05)
+
+    from PIL import ImageEnhance
+    image = ImageEnhance.Brightness(image).enhance(brightness)
+    image = ImageEnhance.Contrast(image).enhance(contrast)
+    image = ImageEnhance.Color(image).enhance(saturation)
+
+    # Hue shift via HSV conversion
+    if abs(hue_shift) > 0.01:
+        import colorsys
+        r_vals, g_vals, b_vals = [], [], []
+        pixels = list(image.getdata())
+        new_pixels = []
+        for r, g, b in pixels:
+            h, s, v = colorsys.rgb_to_hsv(r / 255.0, g / 255.0, b / 255.0)
+            h = (h + hue_shift) % 1.0
+            nr, ng, nb = colorsys.hsv_to_rgb(h, s, v)
+            new_pixels.append((int(nr * 255), int(ng * 255), int(nb * 255)))
+        image.putdata(new_pixels)
+
+    # Random GaussianBlur (30% chance)
+    if random.random() < 0.3:
+        radius = random.uniform(0.5, 1.5)
+        image = image.filter(ImageFilter.GaussianBlur(radius=radius))
+
+    # Random grayscale (10% chance) — robustness terhadap variasi warna
+    if random.random() < 0.1:
+        gray = image.convert("L")
+        image = Image.merge("RGB", (gray, gray, gray))
+
+    return image
+
+
 class TrafficSignDataset:
-    def __init__(self, root_dir: Path, split: str, class_names: List[str]):
+    def __init__(self, root_dir: Path, split: str, class_names: List[str], augment: bool | None = None):
         self.split_dir = Path(root_dir) / split
         self.class_names = class_names
+        # Augmentasi hanya aktif di split training secara default
+        self.augment = split == "train" if augment is None else augment
         self.class_to_yolo, self.yolo_to_label = build_class_maps(
             self.split_dir, class_names
         )
@@ -88,6 +129,8 @@ class TrafficSignDataset:
     def __getitem__(self, index: int):
         image_path, label_path = self.items[index]
         image = Image.open(image_path).convert("RGB")
+        if self.augment:
+            image = _augment_image(image)
         width, height = image.size
 
         annotations: List[Dict[str, float]] = []

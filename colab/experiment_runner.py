@@ -18,7 +18,7 @@ BACKEND_ROOT = REPO_ROOT / "backend"
 LOCAL_DATA_ROOT = REPO_ROOT / "data"
 LOCAL_DATASET_DIR = LOCAL_DATA_ROOT / "traffic_sign"
 
-DEFAULT_MODEL_NAME = "hustvl/yolos-tiny"
+DEFAULT_MODEL_NAME = "hustvl/yolos-small"
 DEFAULT_DATASET_SOURCE = "/content/drive/MyDrive/skripsi-data/traffic_sign.zip"
 DEFAULT_DRIVE_OUTPUT_ROOT = "/content/drive/MyDrive/skripsi-models"
 DEFAULT_DRIVE_MOUNT_POINT = "/content/drive"
@@ -37,57 +37,142 @@ class ExperimentPreset:
     score_threshold: float
     lr_step: int
     lr_gamma: float
+    warmup_epochs: int
+    cosine_decay: bool
+    grad_clip: float
     num_workers: int
     use_amp: bool
 
 
+# Estimasi VRAM per preset (yolos-tiny, AMP aktif, 21 kelas):
+#   img500 bs=4 → ~15GB  | img600 bs=2 → ~15GB  | img700 bs=1 → ~13GB
+# GPU target: L4 (24GB). T4 (16GB): pakai img700 bs=1 saja.
 PRESETS: dict[str, ExperimentPreset] = {
+    # img500: resolusi rendah, bs=4 agar gradient stabil, cocok untuk eksperimen cepat
     "img500": ExperimentPreset(
         preset_key="img500",
         run_name="yolos-image-500",
         output_name="yolos-image-500",
         image_size=500,
-        epochs=30,
-        batch_size=1,
+        epochs=50,
+        batch_size=4,
         learning_rate=0.00005,
         weight_decay=0.0001,
-        score_threshold=0.5,
-        lr_step=10,
+        score_threshold=0.3,
+        lr_step=0,
         lr_gamma=0.5,
-        num_workers=2,
+        warmup_epochs=5,
+        cosine_decay=True,
+        grad_clip=0.1,
+        num_workers=4,
         use_amp=True,
     ),
+    # img600: resolusi sedang, bs=2, sweet spot antara detail dan kecepatan
     "img600": ExperimentPreset(
         preset_key="img600",
         run_name="yolos-image-600",
         output_name="yolos-image-600",
         image_size=600,
-        epochs=30,
-        batch_size=1,
+        epochs=40,
+        batch_size=2,
         learning_rate=0.00005,
         weight_decay=0.0001,
-        score_threshold=0.5,
-        lr_step=10,
+        score_threshold=0.3,
+        lr_step=0,
         lr_gamma=0.5,
-        num_workers=2,
+        warmup_epochs=4,
+        cosine_decay=True,
+        grad_clip=0.1,
+        num_workers=4,
         use_amp=True,
     ),
+    # img700: resolusi tertinggi, bs=1 (batas aman L4), terbaik untuk detail rambu
     "img700": ExperimentPreset(
         preset_key="img700",
         run_name="yolos-image-700",
         output_name="yolos-image-700",
         image_size=700,
-        epochs=30,
+        epochs=40,
         batch_size=1,
         learning_rate=0.00005,
         weight_decay=0.0001,
-        score_threshold=0.5,
-        lr_step=10,
+        score_threshold=0.3,
+        lr_step=0,
         lr_gamma=0.5,
-        num_workers=2,
+        warmup_epochs=4,
+        cosine_decay=True,
+        grad_clip=0.1,
+        num_workers=4,
+        use_amp=True,
+    ),
+    # --- Preset yolos-small (L4 only) ---
+    # VRAM yolos-small ~2.2x yolos-tiny. img700 OOM di L4 (28GB), pakai img500/600 saja.
+    # small-img500: bs=2 aman (~17GB), resolusi cukup, cocok sebagai eksperimen awal small
+    "small-img500": ExperimentPreset(
+        preset_key="small-img500",
+        run_name="yolos-small-image-500",
+        output_name="yolos-small-image-500",
+        image_size=500,
+        epochs=50,
+        batch_size=2,
+        learning_rate=0.00003,
+        weight_decay=0.0001,
+        score_threshold=0.3,
+        lr_step=0,
+        lr_gamma=0.5,
+        warmup_epochs=5,
+        cosine_decay=True,
+        grad_clip=0.1,
+        num_workers=4,
+        use_amp=True,
+    ),
+    # small-img600: bs=1 aman (~16GB), resolusi lebih baik untuk detail panah rambu
+    "small-img600": ExperimentPreset(
+        preset_key="small-img600",
+        run_name="yolos-small-image-600",
+        output_name="yolos-small-image-600",
+        image_size=600,
+        epochs=40,
+        batch_size=1,
+        learning_rate=0.00003,
+        weight_decay=0.0001,
+        score_threshold=0.3,
+        lr_step=0,
+        lr_gamma=0.5,
+        warmup_epochs=4,
+        cosine_decay=True,
+        grad_clip=0.1,
+        num_workers=4,
         use_amp=True,
     ),
 }
+
+
+def _build_scheduler(optimizer, total_epochs, warmup_epochs, cosine_decay, lr_step, lr_gamma):
+    import torch
+
+    if warmup_epochs > 0 and cosine_decay:
+        def warmup_lr_lambda(epoch: int) -> float:
+            if epoch < warmup_epochs:
+                return float(epoch + 1) / float(warmup_epochs)
+            return 1.0
+
+        warmup_scheduler = torch.optim.lr_scheduler.LambdaLR(optimizer, lr_lambda=warmup_lr_lambda)
+        cosine_scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(
+            optimizer,
+            T_max=max(total_epochs - warmup_epochs, 1),
+            eta_min=1e-6,
+        )
+        return torch.optim.lr_scheduler.SequentialLR(
+            optimizer,
+            schedulers=[warmup_scheduler, cosine_scheduler],
+            milestones=[warmup_epochs],
+        )
+
+    if lr_step > 0:
+        return torch.optim.lr_scheduler.StepLR(optimizer, step_size=lr_step, gamma=lr_gamma)
+
+    return None
 
 
 def build_parser(default_preset: str) -> argparse.ArgumentParser:
@@ -305,13 +390,14 @@ def run_experiment(
         lr=preset.learning_rate,
         weight_decay=preset.weight_decay,
     )
-    scheduler = None
-    if preset.lr_step > 0:
-        scheduler = torch.optim.lr_scheduler.StepLR(
-            optimizer,
-            step_size=preset.lr_step,
-            gamma=preset.lr_gamma,
-        )
+    scheduler = _build_scheduler(
+        optimizer=optimizer,
+        total_epochs=preset.epochs,
+        warmup_epochs=preset.warmup_epochs,
+        cosine_decay=preset.cosine_decay,
+        lr_step=preset.lr_step,
+        lr_gamma=preset.lr_gamma,
+    )
 
     use_amp = preset.use_amp and device.type == "cuda"
     scaler = torch.cuda.amp.GradScaler(enabled=use_amp)
@@ -329,6 +415,7 @@ def run_experiment(
             device,
             scaler,
             use_amp,
+            grad_clip=preset.grad_clip,
         )
         if scheduler is not None:
             scheduler.step()

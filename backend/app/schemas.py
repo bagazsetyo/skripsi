@@ -29,9 +29,12 @@ class TrainingRequest(BaseModel):
     num_workers: int = Field(default=2, ge=0, le=16)
     lr_step: int = Field(default=0, ge=0)
     lr_gamma: float = Field(default=0.5, gt=0)
+    warmup_epochs: int = Field(default=3, ge=0)
+    cosine_decay: bool = True
+    grad_clip: float = Field(default=0.1, ge=0)
     use_amp: bool = True
     activate_after_training: bool = True
-    score_threshold: float = Field(default=0.5, ge=0, le=1)
+    score_threshold: float = Field(default=0.3, ge=0, le=1)
 
     @model_validator(mode="after")
     def validate_selected_classes(self):

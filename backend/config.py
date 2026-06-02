@@ -16,7 +16,7 @@ MODEL_NAME = os.getenv("MODEL_NAME", "yolos")
 MODEL_DIR = MODELS_ROOT / MODEL_NAME
 MODEL_PATH = MODEL_DIR
 REGISTRY_DB_PATH = Path(os.getenv("REGISTRY_DB_PATH", PROJECT_ROOT / "app.db"))
-DEFAULT_TRAIN_MODEL_NAME = os.getenv("DEFAULT_TRAIN_MODEL_NAME", "hustvl/yolos-tiny")
+DEFAULT_TRAIN_MODEL_NAME = os.getenv("DEFAULT_TRAIN_MODEL_NAME", "hustvl/yolos-small")
 DEFAULT_IMAGE_SIZE = int(os.getenv("DEFAULT_IMAGE_SIZE", "512"))
 DEFAULT_BATCH_SIZE = int(os.getenv("DEFAULT_BATCH_SIZE", "1"))
 DEFAULT_EPOCHS = int(os.getenv("DEFAULT_EPOCHS", "30"))
@@ -119,7 +119,7 @@ CLASS_LABEL_TO_DIRECTORY = {
     item.label: item.directory for item in TRAFFIC_SIGN_CLASSES
 }
 
-SCORE_THRESHOLD = float(os.getenv("SCORE_THRESHOLD", "0.5"))
+SCORE_THRESHOLD = float(os.getenv("SCORE_THRESHOLD", "0.3"))
 
 
 def _parse_cors_origins() -> list[str]:

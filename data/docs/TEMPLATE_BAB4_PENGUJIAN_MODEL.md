@@ -70,6 +70,54 @@ Paragraf narasi yang bisa dipakai:
 
 > Berdasarkan skenario pengujian yang telah ditetapkan, penelitian ini membandingkan tiga konfigurasi model dengan ukuran input gambar yang berbeda, yaitu 500, 600, dan 700 piksel. Parameter lain seperti epoch, batch size, learning rate, weight decay, dan score threshold dijaga tetap agar pengaruh image size terhadap performa model dapat diamati dengan lebih jelas.
 
+### Perbandingan Konfigurasi Antar Model
+
+Bagian ini penting untuk menjawab pertanyaan dosen seperti:
+- apa yang berubah dari model 500 ke 600?
+- apa yang tetap?
+- kenapa hasilnya berbeda?
+
+Tabel berikut bisa dipakai:
+
+| Aspek | Model 500 | Model 600 | Model 700 | Keterangan |
+|---|---|---|---|---|
+| Image Size | 500 | 600 | 700 | Parameter utama yang dibandingkan |
+| Epochs | 30 | 30 | 30 | Tetap |
+| Batch Size | 1 | 1 | 1 | Tetap agar aman terhadap memori GPU |
+| Learning Rate | 0.00005 | 0.00005 | 0.00005 | Tetap |
+| Weight Decay | 0.0001 | 0.0001 | 0.0001 | Tetap |
+| Score Threshold | 0.5 | 0.5 | 0.5 | Tetap |
+
+Narasi yang bisa dipakai:
+
+> Pada pengujian ini, hanya parameter image size yang diubah, yaitu 500, 600, dan 700 piksel. Parameter lain seperti epoch, batch size, learning rate, weight decay, dan score threshold dijaga tetap. Dengan demikian, perbedaan hasil evaluasi yang diperoleh dapat dianalisis sebagai pengaruh dari perubahan ukuran input gambar.
+
+### Penjelasan Perubahan dari 500 ke 600 ke 700
+
+Template penjelasan:
+
+- **Model 500**
+  - ukuran input lebih kecil
+  - kebutuhan komputasi lebih ringan
+  - waktu training cenderung lebih cepat
+  - risiko: objek kecil bisa kurang terlihat jelas
+
+- **Model 600**
+  - ukuran input menengah
+  - detail visual lebih baik dibanding model 500
+  - beban komputasi meningkat dibanding model 500
+  - sering menjadi titik tengah antara akurasi dan efisiensi
+
+- **Model 700**
+  - ukuran input paling besar di antara tiga percobaan
+  - detail objek kecil berpotensi paling baik
+  - waktu training dan kebutuhan memori paling tinggi
+  - belum tentu selalu terbaik jika data atau proses training kurang stabil
+
+Kalimat aman:
+
+> Secara umum, peningkatan image size dari 500 ke 600 dan 700 diharapkan memberikan detail visual yang lebih baik kepada model. Namun, peningkatan ukuran input juga meningkatkan kebutuhan komputasi, sehingga perlu diamati apakah peningkatan akurasi yang diperoleh sebanding dengan biaya komputasi tambahan.
+
 ## 4.X.5 Hasil Pengujian
 
 Tabel berikut digunakan untuk mencatat hasil evaluasi tiap model.
@@ -84,6 +132,24 @@ Paragraf narasi yang bisa dipakai:
 
 > Setelah proses training selesai, masing-masing model dievaluasi menggunakan data pengujian untuk memperoleh nilai loss akhir, precision, recall, mAP@0.5, dan mean IoU. Hasil pengujian ini digunakan untuk menentukan konfigurasi model yang memberikan performa terbaik pada deteksi dan klasifikasi rambu lalu lintas Indonesia.
 
+### Tabel Perbandingan Dampak Perubahan Image Size
+
+Tabel ini dipakai untuk menulis hasil observasi perubahan dari 500 ke 600 ke 700.
+
+| Aspek yang Diamati | Model 500 | Model 600 | Model 700 | Kesimpulan |
+|---|---|---|---|---|
+| Waktu training | - | - | - | - |
+| Loss akhir | - | - | - | - |
+| Precision | - | - | - | - |
+| Recall | - | - | - | - |
+| mAP@0.5 | - | - | - | - |
+| Mean IoU | - | - | - | - |
+| Deteksi objek kecil | - | - | - | - |
+
+Narasi yang bisa dipakai:
+
+> Berdasarkan tabel perbandingan, setiap kenaikan image size memberikan perubahan terhadap performa model maupun kebutuhan komputasi. Oleh karena itu, analisis tidak hanya berfokus pada satu nilai metrik, tetapi juga mempertimbangkan kestabilan hasil dan efisiensi proses training.
+
 ## 4.X.6 Analisis Hasil Pengujian
 
 Bagian ini berisi pembahasan hasil, bukan hanya menampilkan angka.
@@ -95,6 +161,28 @@ Template analisis:
 > Namun demikian, peningkatan image size juga berdampak pada meningkatnya kebutuhan komputasi dan waktu training. Model dengan ukuran input yang lebih besar membutuhkan proses pelatihan yang lebih lama dibandingkan model dengan ukuran input yang lebih kecil. Oleh karena itu, pemilihan model terbaik tidak hanya mempertimbangkan akurasi, tetapi juga efisiensi komputasi.
 
 > Pada penelitian ini, model [isi nama model terbaik] dipilih sebagai model terbaik karena memberikan keseimbangan yang paling baik antara performa deteksi dan efisiensi proses training.
+
+### Template Analisis Perubahan Antar Konfigurasi
+
+Bagian ini bisa ditulis lebih eksplisit agar terlihat benar-benar membandingkan 500, 600, dan 700.
+
+#### Perbandingan Model 500 dan Model 600
+
+Template:
+
+> Dibandingkan model 500, model 600 menunjukkan [isi peningkatan/penurunan] pada metrik [isi metrik]. Hal ini mengindikasikan bahwa penambahan ukuran input dari 500 menjadi 600 memberikan [isi dampak], terutama pada [isi kondisi, misalnya objek kecil atau detail rambu].
+
+#### Perbandingan Model 600 dan Model 700
+
+Template:
+
+> Dibandingkan model 600, model 700 menunjukkan [isi peningkatan/penurunan] pada metrik [isi metrik]. Meskipun ukuran input lebih besar berpotensi memberikan detail visual yang lebih baik, peningkatan ini juga disertai dengan [isi dampak, misalnya waktu training lebih lama atau kebutuhan komputasi lebih tinggi].
+
+#### Kesimpulan Perbandingan 500, 600, dan 700
+
+Template:
+
+> Berdasarkan ketiga konfigurasi yang diuji, dapat dilihat bahwa perubahan image size memengaruhi performa model secara nyata. Model dengan ukuran input yang lebih besar tidak selalu otomatis menjadi yang terbaik, karena hasil akhir tetap dipengaruhi oleh kualitas data, kestabilan proses training, dan efisiensi komputasi.
 
 ### Template analisis per model
 

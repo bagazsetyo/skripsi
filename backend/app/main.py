@@ -2,8 +2,10 @@ from __future__ import annotations
 
 from io import BytesIO
 from pathlib import Path
+import json
 import os
 import tempfile
+import time
 
 from fastapi import BackgroundTasks, Depends, FastAPI, File, Form, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
@@ -11,11 +13,12 @@ from fastapi.responses import HTMLResponse
 from PIL import Image
 import torch
 
+from app.annotate import build_annotate_html
 from app.auth import authenticate_admin, create_access_token, get_current_admin
 from app.inference import Predictor
 from app.schemas import LoginRequest, LoginResponse, PredictionResponse, TrainingRequest
 from app.video_demo import build_video_demo_html
-from config import CLASS_NAMES, CORS_ALLOW_ORIGINS, SCORE_THRESHOLD
+from config import CLASS_LABEL_TO_ID, CLASS_NAMES, CORS_ALLOW_ORIGINS, DATA_DIR, SCORE_THRESHOLD
 from dataset_scan import build_class_lookup, scan_dataset, validate_dataset
 from db import (
     get_active_model,
@@ -321,3 +324,98 @@ async def predict(file: UploadFile = File(...), score_threshold: float = SCORE_T
         image_height=image.height,
         detections=results,
     )
+
+
+# ── Annotation tool ────────────────────────────────────────────────────────
+
+@app.get("/annotate", response_class=HTMLResponse)
+def annotate_page():
+    """Halaman web untuk menambah gambar + bounding box ke dataset."""
+    return HTMLResponse(content=build_annotate_html(CLASS_NAMES))
+
+
+@app.post("/data/save-annotation")
+async def save_annotation(
+    file: UploadFile = File(...),
+    annotations: str = Form(...),
+    class_label: str = Form(...),
+    split: str = Form(...),
+    img_width: int = Form(...),
+    img_height: int = Form(...),
+):
+    """Simpan gambar yang sudah dianotasi ke folder dataset yang sesuai."""
+
+    # Validasi kelas
+    if class_label not in CLASS_LABEL_TO_ID:
+        raise HTTPException(status_code=400, detail=f"Kelas tidak dikenal: {class_label}")
+
+    # Validasi split
+    if split not in ("train", "test"):
+        raise HTTPException(status_code=400, detail="Split harus 'train' atau 'test'")
+
+    # Parse annotations JSON
+    try:
+        ann_list: list[dict] = json.loads(annotations)
+    except json.JSONDecodeError as exc:
+        raise HTTPException(status_code=400, detail="Format annotations tidak valid") from exc
+
+    if not ann_list:
+        raise HTTPException(status_code=400, detail="Minimal satu anotasi bbox diperlukan")
+
+    # Baca gambar
+    contents = await file.read()
+    try:
+        image = Image.open(BytesIO(contents)).convert("RGB")
+    except Exception as exc:
+        raise HTTPException(status_code=400, detail="File gambar tidak valid") from exc
+
+    iw, ih = image.size
+
+    # Folder tujuan
+    dest_dir = DATA_DIR / split / class_label
+    dest_dir.mkdir(parents=True, exist_ok=True)
+
+    # Nama file unik
+    original_stem = Path(file.filename or "image").stem
+    suffix = Path(file.filename or "image.jpg").suffix.lower()
+    if suffix not in {".jpg", ".jpeg", ".png", ".bmp"}:
+        suffix = ".jpg"
+    ts = int(time.time() * 1000) % 1_000_000
+    dest_img = dest_dir / f"{original_stem}_{ts}{suffix}"
+    while dest_img.exists():
+        ts += 1
+        dest_img = dest_dir / f"{original_stem}_{ts}{suffix}"
+
+    # Simpan gambar
+    image.save(dest_img)
+
+    # Tulis label YOLO — semua bbox pakai class_id dari class_label (folder constraint)
+    class_id = CLASS_LABEL_TO_ID[class_label]
+    lines: list[str] = []
+    for ann in ann_list:
+        try:
+            x1 = max(0, min(int(ann["x1"]), iw))
+            y1 = max(0, min(int(ann["y1"]), ih))
+            x2 = max(0, min(int(ann["x2"]), iw))
+            y2 = max(0, min(int(ann["y2"]), ih))
+        except (KeyError, TypeError, ValueError) as exc:
+            dest_img.unlink(missing_ok=True)
+            raise HTTPException(status_code=400, detail=f"Format bbox tidak valid: {exc}") from exc
+
+        cx = (x1 + x2) / 2.0 / iw
+        cy = (y1 + y2) / 2.0 / ih
+        w  = abs(x2 - x1) / iw
+        h  = abs(y2 - y1) / ih
+        lines.append(f"{class_id} {cx:.6f} {cy:.6f} {w:.6f} {h:.6f}")
+
+    dest_txt = dest_img.with_suffix(".txt")
+    dest_txt.write_text("\n".join(lines), encoding="utf-8")
+
+    rel = str(dest_img.relative_to(DATA_DIR.parent.parent))
+    return {
+        "saved_as": rel,
+        "class_label": class_label,
+        "split": split,
+        "bbox_count": len(lines),
+        "image_size": [iw, ih],
+    }

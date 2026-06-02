@@ -16,7 +16,7 @@ def build_model(model_name: str, class_names: list[str]):
     )
 
 
-def train_one_epoch(model, processor, optimizer, loader, device, scaler=None, amp=False):
+def train_one_epoch(model, processor, optimizer, loader, device, scaler=None, amp=False, grad_clip: float = 0.1):
     model.train()
     running_loss = 0.0
     for images, targets in loader:
@@ -32,10 +32,15 @@ def train_one_epoch(model, processor, optimizer, loader, device, scaler=None, am
             loss = outputs.loss
         if amp and scaler is not None:
             scaler.scale(loss).backward()
+            if grad_clip > 0:
+                scaler.unscale_(optimizer)
+                torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=grad_clip)
             scaler.step(optimizer)
             scaler.update()
         else:
             loss.backward()
+            if grad_clip > 0:
+                torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=grad_clip)
             optimizer.step()
 
         running_loss += loss.item()
