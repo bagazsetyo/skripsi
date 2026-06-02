@@ -148,9 +148,14 @@ Target:
 - siapkan alur upload dataset
 - siapkan alur training
 - siapkan alur import model kembali ke aplikasi
+- siapkan template Google Colab yang bisa langsung menjalankan training otomatis dan menyimpan hasil ke Google Drive
 
 Output selesai:
 - training final di cloud lebih siap dijalankan
+
+Catatan:
+- runner Google Colab otomatis untuk preset `500`, `600`, dan `700` sudah tersedia
+- yang masih tersisa adalah pemakaian runner tersebut untuk eksperimen nyata dan alur model kembali ke aplikasi lokal
 
 ### Step 9 — Tambahkan pengujian video / near real-time
 Status: `pending`

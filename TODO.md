@@ -82,6 +82,15 @@ Dokumen ini adalah daftar kerja terbaru setelah bimbingan. Fokus utama sekarang 
 - siapkan langkah upload dataset
 - siapkan langkah training model di cloud
 - siapkan langkah membawa model kembali ke aplikasi lokal
+- buat template Google Colab yang siap jalan otomatis:
+  - mount Google Drive
+  - clone repo
+  - install dependency
+  - copy/unzip dataset
+  - jalankan training dengan parameter yang sudah ditentukan
+  - simpan hasil model otomatis ke Google Drive
+  - beri nama output model secara konsisten
+- usahakan nanti di Colab cukup menjalankan file / command Python yang sudah disiapkan, tanpa banyak setup manual
 
 ## Prioritas 4 — Pengujian Video / Near Real-Time
 

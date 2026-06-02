@@ -29,7 +29,9 @@ Thumbs.db
 .DS_Store
 
 # Local data and trained models
-data/
+data/*
+!data/docs/
+!data/docs/**
 backend/models/
 
 # Runtime artifacts
