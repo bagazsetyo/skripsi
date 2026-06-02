@@ -113,29 +113,43 @@ Ada 2 cara.
 Misalnya Anda menyimpan dataset di:
 
 ```text
-MyDrive/skripsi-data/traffic_sign
+MyDrive/databagas/skripsi-data/traffic_sign
 ```
 
 Maka jalankan:
 
 ```python
 !mkdir -p /content/skripsi/data
-!cp -r "/content/drive/MyDrive/skripsi-data/traffic_sign" "/content/skripsi/data/traffic_sign"
+!cp -r "/content/drive/MyDrive/databagas/skripsi-data/traffic_sign" "/content/skripsi/data/traffic_sign"
 ```
+
+Contoh path yang sesuai dengan struktur Anda sekarang:
+
+```text
+/content/drive/MyDrive/databagas/skripsi-data/traffic_sign/test/petunjuk-penyeberangan-pejalan-kaki/petunjuk-penyeberangan-pejalan-kaki (97).jpg
+```
+
+Artinya sumber dataset yang dipakai runner nanti bisa langsung diarahkan ke:
+
+```text
+/content/drive/MyDrive/databagas/skripsi-data/traffic_sign
+```
+
+dan **tidak wajib** di-zip terlebih dahulu.
 
 ### Opsi B - Dataset dalam file zip di Google Drive
 
 Misalnya file zip ada di:
 
 ```text
-MyDrive/skripsi-data/traffic_sign.zip
+MyDrive/databagas/skripsi-data/traffic_sign.zip
 ```
 
 Jalankan:
 
 ```python
 !mkdir -p /content/skripsi/data
-!unzip -q "/content/drive/MyDrive/skripsi-data/traffic_sign.zip" -d /content/skripsi/data
+!unzip -q "/content/drive/MyDrive/databagas/skripsi-data/traffic_sign.zip" -d /content/skripsi/data
 ```
 
 Setelah itu cek strukturnya:
@@ -161,21 +175,21 @@ Contoh menjalankan preset `image size 500`:
 
 ```python
 %cd /content/skripsi
-!python colab/run_image_500.py --dataset-source "/content/drive/MyDrive/skripsi-data/traffic_sign.zip"
+!python colab/run_image_500.py --dataset-source "/content/drive/MyDrive/databagas/skripsi-data/traffic_sign"
 ```
 
 Contoh preset `image size 600`:
 
 ```python
 %cd /content/skripsi
-!python colab/run_image_600.py --dataset-source "/content/drive/MyDrive/skripsi-data/traffic_sign.zip"
+!python colab/run_image_600.py --dataset-source "/content/drive/MyDrive/databagas/skripsi-data/traffic_sign"
 ```
 
 Contoh preset `image size 700`:
 
 ```python
 %cd /content/skripsi
-!python colab/run_image_700.py --dataset-source "/content/drive/MyDrive/skripsi-data/traffic_sign.zip"
+!python colab/run_image_700.py --dataset-source "/content/drive/MyDrive/databagas/skripsi-data/traffic_sign"
 ```
 
 Runner tersebut akan otomatis:
@@ -199,6 +213,7 @@ Catatan:
 - Anda tetap bisa mengganti lokasi dataset dengan `--dataset-source`
 - Anda juga bisa mengganti folder output dengan `--drive-output-root`
 - jika dataset lokal ingin di-copy ulang, tambahkan `--force-dataset-copy`
+- jika dataset Anda sudah berupa folder lengkap `traffic_sign`, lebih praktis langsung arahkan `--dataset-source` ke folder tersebut
 
 ## 8B. Opsi manual
 

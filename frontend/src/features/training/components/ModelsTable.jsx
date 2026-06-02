@@ -1,4 +1,4 @@
-import { Button, Space, Table, Tag } from "antd";
+import { Button, Descriptions, Divider, Space, Table, Tag, Typography } from "antd";
 import { CheckCircleOutlined } from "@ant-design/icons";
 import { PageSection } from "../../../app/shared/PageSection";
 
@@ -80,6 +80,61 @@ export function ModelsTable({ models, onActivate, isActivating }) {
         pagination={{ pageSize: 5, showSizeChanger: false }}
         size="middle"
         scroll={{ x: 1200 }}
+        expandable={{
+          expandedRowRender: (record) => (
+            <Space direction="vertical" size="middle" style={{ width: "100%" }}>
+              <Descriptions size="small" column={2} bordered>
+                <Descriptions.Item label="Path Model">{record.path}</Descriptions.Item>
+                <Descriptions.Item label="Dibuat">{record.created_at || "-"}</Descriptions.Item>
+                <Descriptions.Item label="Jumlah Kelas">
+                  {record.class_names?.length ?? 0}
+                </Descriptions.Item>
+                <Descriptions.Item label="Source">
+                  {record.config?.source || "-"}
+                </Descriptions.Item>
+              </Descriptions>
+
+              <div>
+                <Typography.Text strong>Daftar Kelas</Typography.Text>
+                <div style={{ marginTop: 8 }}>
+                  <Space size={[8, 8]} wrap>
+                    {(record.class_names || []).map((className) => (
+                      <Tag key={className}>{className}</Tag>
+                    ))}
+                  </Space>
+                </div>
+              </div>
+
+              {record.metrics ? (
+                <>
+                  <Divider style={{ margin: "8px 0" }} />
+                  <Descriptions size="small" column={4} bordered>
+                    <Descriptions.Item label="Precision">
+                      {typeof record.metrics?.precision === "number"
+                        ? record.metrics.precision.toFixed(3)
+                        : "-"}
+                    </Descriptions.Item>
+                    <Descriptions.Item label="Recall">
+                      {typeof record.metrics?.recall === "number"
+                        ? record.metrics.recall.toFixed(3)
+                        : "-"}
+                    </Descriptions.Item>
+                    <Descriptions.Item label="mAP@0.5">
+                      {typeof record.metrics?.mAP_50 === "number"
+                        ? record.metrics.mAP_50.toFixed(3)
+                        : "-"}
+                    </Descriptions.Item>
+                    <Descriptions.Item label="Mean IoU">
+                      {typeof record.metrics?.mean_iou === "number"
+                        ? record.metrics.mean_iou.toFixed(3)
+                        : "-"}
+                    </Descriptions.Item>
+                  </Descriptions>
+                </>
+              ) : null}
+            </Space>
+          ),
+        }}
       />
     </PageSection>
   );

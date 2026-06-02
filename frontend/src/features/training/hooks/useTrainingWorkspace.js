@@ -26,6 +26,18 @@ export function useTrainingWorkspace() {
     },
   });
 
+  const importModelMutation = useMutation({
+    mutationFn: trainingApi.importModel,
+    onSuccess: () => {
+      message.success("Model berhasil diimport");
+      queryClient.invalidateQueries({ queryKey: ["models"] });
+      queryClient.invalidateQueries({ queryKey: ["models", "active"] });
+    },
+    onError: (error) => {
+      message.error(error?.response?.data?.detail || error?.message || "Gagal mengimport model");
+    },
+  });
+
   const activateModelMutation = useMutation({
     mutationFn: trainingApi.activateModel,
     onSuccess: () => {
@@ -55,6 +67,8 @@ export function useTrainingWorkspace() {
     errors: [configQuery.error, runsQuery.error, modelsQuery.error].filter(Boolean),
     createRun: createRunMutation.mutateAsync,
     isCreatingRun: createRunMutation.isPending,
+    importModel: importModelMutation.mutateAsync,
+    isImportingModel: importModelMutation.isPending,
     activateModel: activateModelMutation.mutateAsync,
     isActivatingModel: activateModelMutation.isPending,
     refetchAll: () => {

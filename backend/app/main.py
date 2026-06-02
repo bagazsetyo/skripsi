@@ -2,8 +2,10 @@ from __future__ import annotations
 
 from io import BytesIO
 from pathlib import Path
+import os
+import tempfile
 
-from fastapi import BackgroundTasks, Depends, FastAPI, File, HTTPException, UploadFile
+from fastapi import BackgroundTasks, Depends, FastAPI, File, Form, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse
 from PIL import Image
@@ -25,6 +27,7 @@ from db import (
     utc_now,
     upsert_dataset_cache,
 )
+from model_import import import_model_archive
 from model_registry import activate_model, ensure_default_model_registered, get_model_or_none, resolve_active_model_path
 from training_service import (
     create_training_run_record,
@@ -222,6 +225,44 @@ def training_run_detail(run_id: int, _: dict = Depends(get_current_admin)):
 @app.get("/models")
 def models(_: dict = Depends(get_current_admin)):
     return list_models()
+
+
+@app.post("/models/import")
+async def import_model_endpoint(
+    file: UploadFile = File(...),
+    display_name: str | None = Form(default=None),
+    version: str | None = Form(default=None),
+    activate_after_import: bool = Form(default=False),
+    _: dict = Depends(get_current_admin),
+):
+    if not file.filename or not file.filename.lower().endswith(".zip"):
+        raise HTTPException(status_code=400, detail="Imported model must be a .zip archive")
+
+    temp_path: str | None = None
+    try:
+        with tempfile.NamedTemporaryFile(delete=False, suffix=".zip") as temp_file:
+            temp_path = temp_file.name
+            while True:
+                chunk = await file.read(1024 * 1024)
+                if not chunk:
+                    break
+                temp_file.write(chunk)
+
+        model_record = import_model_archive(
+            Path(temp_path),
+            display_name=display_name,
+            version=version,
+            activate=activate_after_import,
+        )
+        if model_record["is_active"]:
+            reload_active_predictor()
+        return model_record
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    finally:
+        await file.close()
+        if temp_path and Path(temp_path).exists():
+            os.unlink(temp_path)
 
 
 @app.get("/models/active")

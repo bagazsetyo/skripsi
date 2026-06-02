@@ -13,6 +13,12 @@ export const trainingApi = {
     const response = await agent.post("/training/runs", payload);
     return response.data;
   },
+  importModel: async (formData) => {
+    const response = await agent.post("/models/import", formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
+    return response.data;
+  },
   getModels: async () => {
     const response = await agent.get("/models");
     return response.data;

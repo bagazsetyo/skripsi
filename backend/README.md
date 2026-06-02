@@ -69,6 +69,7 @@ You still need to rebuild if:
 - `GET /training/runs`
 - `GET /training/runs/{id}`
 - `GET /models`
+- `POST /models/import`
 - `GET /models/active`
 - `POST /models/{id}/activate`
 - `GET /models/{id}/evaluation`
@@ -92,6 +93,22 @@ Response format:
   }
 ]
 ```
+
+### Import model
+
+Model hasil training dari Google Colab atau environment lain bisa diimport dalam bentuk file ZIP.
+
+Endpoint:
+
+```text
+POST /models/import
+```
+
+Field multipart:
+- `file` : file ZIP model
+- `display_name` : opsional
+- `version` : opsional
+- `activate_after_import` : opsional, `true` atau `false`
 
 ## Real-Time Demo (Python + OpenCV)
 

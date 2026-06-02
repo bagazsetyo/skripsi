@@ -1,6 +1,7 @@
 import { Alert, Button, Result, Space, Spin, Typography } from "antd";
 import { ReloadOutlined } from "@ant-design/icons";
 import { ActiveModelCard } from "./components/ActiveModelCard";
+import { ModelImportForm } from "./components/ModelImportForm";
 import { ModelsTable } from "./components/ModelsTable";
 import { TrainingRunForm } from "./components/TrainingRunForm";
 import { TrainingRunsTable } from "./components/TrainingRunsTable";
@@ -17,6 +18,8 @@ export function TrainingPage() {
     errors,
     createRun,
     isCreatingRun,
+    importModel,
+    isImportingModel,
     activateModel,
     isActivatingModel,
     refetchAll,
@@ -68,6 +71,8 @@ export function TrainingPage() {
         isSubmitting={isCreatingRun}
         onSubmit={createRun}
       />
+
+      <ModelImportForm onSubmit={importModel} isSubmitting={isImportingModel} />
 
       <ModelsTable
         models={models}

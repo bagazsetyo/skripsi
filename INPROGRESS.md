@@ -116,7 +116,7 @@ Output selesai:
 - tersedia hasil eksperimen yang bisa masuk Bab 4
 
 ### Step 6 — Tambahkan import/upload model
-Status: `pending`
+Status: `done`
 
 Target:
 - upload model hasil training dari luar aplikasi
@@ -129,6 +129,8 @@ Target:
 
 Output selesai:
 - model hasil cloud training bisa dipakai di aplikasi lokal
+- import file ZIP model hasil Colab sudah tersedia dari halaman `Training & Model`
+- backend memvalidasi isi model Hugging Face sebelum mendaftarkan ke registry
 
 ### Step 7 — Tambahkan download/export model
 Status: `pending`
