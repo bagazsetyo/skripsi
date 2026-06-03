@@ -107,39 +107,39 @@ PRESETS: dict[str, ExperimentPreset] = {
     ),
     # --- Preset yolos-small (L4 only) ---
     # VRAM yolos-small ~2.2x yolos-tiny. img700 OOM di L4 (28GB), pakai img500/600 saja.
-    # small-img500: bs=2 aman (~17GB), resolusi cukup, cocok sebagai eksperimen awal small
+    # small-img500: bs=2 aman (~17GB), ~4-5 jam di L4
     "small-img500": ExperimentPreset(
         preset_key="small-img500",
         run_name="yolos-small-image-500",
         output_name="yolos-small-image-500",
         image_size=500,
-        epochs=50,
+        epochs=35,
         batch_size=2,
         learning_rate=0.00003,
         weight_decay=0.0001,
         score_threshold=0.3,
         lr_step=0,
         lr_gamma=0.5,
-        warmup_epochs=5,
+        warmup_epochs=4,
         cosine_decay=True,
         grad_clip=0.1,
         num_workers=4,
         use_amp=True,
     ),
-    # small-img600: bs=1 aman (~16GB), resolusi lebih baik untuk detail panah rambu
+    # small-img600: bs=1 aman (~16GB), ~6.5 jam di L4
     "small-img600": ExperimentPreset(
         preset_key="small-img600",
         run_name="yolos-small-image-600",
         output_name="yolos-small-image-600",
         image_size=600,
-        epochs=40,
+        epochs=30,
         batch_size=1,
         learning_rate=0.00003,
         weight_decay=0.0001,
         score_threshold=0.3,
         lr_step=0,
         lr_gamma=0.5,
-        warmup_epochs=4,
+        warmup_epochs=3,
         cosine_decay=True,
         grad_clip=0.1,
         num_workers=4,
