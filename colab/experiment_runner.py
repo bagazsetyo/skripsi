@@ -285,7 +285,15 @@ def prepare_dataset(dataset_source: Path, *, force_copy: bool) -> Path:
     if not dataset_source.exists():
         raise FileNotFoundError(f"Dataset source tidak ditemukan: {dataset_source}")
 
+    size_bytes = dataset_source.stat().st_size
+    if size_bytes >= 1_073_741_824:
+        size_str = f"{size_bytes / 1_073_741_824:.2f} GB"
+    elif size_bytes >= 1_048_576:
+        size_str = f"{size_bytes / 1_048_576:.2f} MB"
+    else:
+        size_str = f"{size_bytes / 1_024:.1f} KB"
     print(f"[INFO] Menyiapkan dataset dari {dataset_source} ...")
+    print(f"[INFO] Ukuran file : {size_str} ({size_bytes:,} bytes)")
 
     if dataset_source.is_dir():
         dataset_dir = locate_dataset_dir(dataset_source)
