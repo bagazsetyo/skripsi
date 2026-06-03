@@ -34,72 +34,44 @@ class TrafficSignClass:
     directory: str
 
 
+# Kelas yang sementara dikecualikan dari training (folder tetap ada di disk).
+# Untuk mengaktifkan kembali: kosongkan set ini.
+EXCLUDED_CLASS_LABELS: frozenset[str] = frozenset({
+    "lampu-hijau",
+    "lampu-kuning",
+    "lampu-merah",
+})
+
+_ALL_TRAFFIC_SIGN_CLASSES = [
+    TrafficSignClass(0,  "larangan-berhenti",                                           "larangan-berhenti"),
+    TrafficSignClass(1,  "larangan-masuk-bagi-kendaraan-bermotor-dan-tidak-bermotor",   "larangan-masuk-bagi-kendaraan-bermotor-dan-tidak-bermotor"),
+    TrafficSignClass(2,  "larangan-parkir",                                             "larangan-parkir"),
+    TrafficSignClass(3,  "lampu-hijau",                                                 "lampu-hijau"),
+    TrafficSignClass(4,  "lampu-kuning",                                                "lampu-kuning"),
+    TrafficSignClass(5,  "lampu-merah",                                                 "lampu-merah"),
+    TrafficSignClass(6,  "larangan-belok-kanan",                                        "larangan-belok-kanan"),
+    TrafficSignClass(7,  "larangan-belok-kiri",                                         "larangan-belok-kiri"),
+    TrafficSignClass(8,  "larangan-berjalan-terus-wajib-berhenti-sesaat",               "larangan-berjalan-terus-wajib-berhenti-sesaat"),
+    TrafficSignClass(9,  "larangan-memutar-balik",                                      "larangan-memutar-balik"),
+    TrafficSignClass(10, "peringatan-alat-pemberi-isyarat-lalu-lintas",                 "peringatan-alat-pemberi-isyarat-lalu-lintas"),
+    TrafficSignClass(11, "peringatan-banyak-pejalan-kaki-menggunakan-zebra-cross",      "peringatan-banyak-pejalan-kaki-menggunakan-zebra-cross"),
+    TrafficSignClass(12, "peringatan-pintu-perlintasan-kereta-api",                     "peringatan-pintu-perlintasan-kereta-api"),
+    TrafficSignClass(13, "peringatan-simpang-tiga-sisi-kiri",                           "peringatan-simpang-tiga-sisi-kiri"),
+    TrafficSignClass(14, "peringatan-penegasan-rambu-tambahan",                         "peringatan-penegasan-rambu-tambahan"),
+    TrafficSignClass(15, "perintah-masuk-jalur-kiri",                                  "perintah-masuk-jalur-kiri"),
+    TrafficSignClass(16, "perintah-pilihan-memasuki-salah-satu-jalur",                  "perintah-pilihan-memasuki-salah-satu-jalur"),
+    TrafficSignClass(17, "petunjuk-area-parkir",                                        "petunjuk-area-parkir"),
+    TrafficSignClass(18, "petunjuk-lokasi-pemberhentian-bus",                           "petunjuk-lokasi-pemberhentian-bus"),
+    TrafficSignClass(19, "petunjuk-lokasi-putar-balik",                                 "petunjuk-lokasi-putar-balik"),
+    TrafficSignClass(20, "petunjuk-penyeberangan-pejalan-kaki",                         "petunjuk-penyeberangan-pejalan-kaki"),
+]
+
+# Re-index class ID mulai 0 setelah membuang kelas yang dikecualikan
 TRAFFIC_SIGN_CLASSES = [
-    TrafficSignClass(0, "larangan-berhenti", "larangan-berhenti"),
-    TrafficSignClass(
-        1,
-        "larangan-masuk-bagi-kendaraan-bermotor-dan-tidak-bermotor",
-        "larangan-masuk-bagi-kendaraan-bermotor-dan-tidak-bermotor",
-    ),
-    TrafficSignClass(2, "larangan-parkir", "larangan-parkir"),
-    TrafficSignClass(3, "lampu-hijau", "lampu-hijau"),
-    TrafficSignClass(4, "lampu-kuning", "lampu-kuning"),
-    TrafficSignClass(5, "lampu-merah", "lampu-merah"),
-    TrafficSignClass(6, "larangan-belok-kanan", "larangan-belok-kanan"),
-    TrafficSignClass(7, "larangan-belok-kiri", "larangan-belok-kiri"),
-    TrafficSignClass(
-        8,
-        "larangan-berjalan-terus-wajib-berhenti-sesaat",
-        "larangan-berjalan-terus-wajib-berhenti-sesaat",
-    ),
-    TrafficSignClass(9, "larangan-memutar-balik", "larangan-memutar-balik"),
-    TrafficSignClass(
-        10,
-        "peringatan-alat-pemberi-isyarat-lalu-lintas",
-        "peringatan-alat-pemberi-isyarat-lalu-lintas",
-    ),
-    TrafficSignClass(
-        11,
-        "peringatan-banyak-pejalan-kaki-menggunakan-zebra-cross",
-        "peringatan-banyak-pejalan-kaki-menggunakan-zebra-cross",
-    ),
-    TrafficSignClass(
-        12,
-        "peringatan-pintu-perlintasan-kereta-api",
-        "peringatan-pintu-perlintasan-kereta-api",
-    ),
-    TrafficSignClass(
-        13,
-        "peringatan-simpang-tiga-sisi-kiri",
-        "peringatan-simpang-tiga-sisi-kiri",
-    ),
-    TrafficSignClass(
-        14,
-        "peringatan-penegasan-rambu-tambahan",
-        "peringatan-penegasan-rambu-tambahan",
-    ),
-    TrafficSignClass(15, "perintah-masuk-jalur-kiri", "perintah-masuk-jalur-kiri"),
-    TrafficSignClass(
-        16,
-        "perintah-pilihan-memasuki-salah-satu-jalur",
-        "perintah-pilihan-memasuki-salah-satu-jalur",
-    ),
-    TrafficSignClass(17, "petunjuk-area-parkir", "petunjuk-area-parkir"),
-    TrafficSignClass(
-        18,
-        "petunjuk-lokasi-pemberhentian-bus",
-        "petunjuk-lokasi-pemberhentian-bus",
-    ),
-    TrafficSignClass(
-        19,
-        "petunjuk-lokasi-putar-balik",
-        "petunjuk-lokasi-putar-balik",
-    ),
-    TrafficSignClass(
-        20,
-        "petunjuk-penyeberangan-pejalan-kaki",
-        "petunjuk-penyeberangan-pejalan-kaki",
-    ),
+    TrafficSignClass(new_id, c.label, c.directory)
+    for new_id, c in enumerate(
+        c for c in _ALL_TRAFFIC_SIGN_CLASSES if c.label not in EXCLUDED_CLASS_LABELS
+    )
 ]
 
 CLASS_NAMES = [item.label for item in TRAFFIC_SIGN_CLASSES]

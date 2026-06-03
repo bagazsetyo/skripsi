@@ -9,11 +9,19 @@ import time
 
 from fastapi import BackgroundTasks, Depends, FastAPI, File, Form, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import HTMLResponse
+from fastapi.responses import FileResponse, HTMLResponse, JSONResponse
+from pydantic import BaseModel
 from PIL import Image
 import torch
 
 from app.annotate import build_annotate_html
+from app.tambahan import (
+    TAMBAHAN_DIR,
+    build_tambahan_html,
+    get_images_page,
+    list_image_sources,
+    move_images,
+)
 from app.auth import authenticate_admin, create_access_token, get_current_admin
 from app.inference import Predictor
 from app.schemas import LoginRequest, LoginResponse, PredictionResponse, TrainingRequest
@@ -324,6 +332,57 @@ async def predict(file: UploadFile = File(...), score_threshold: float = SCORE_T
         image_height=image.height,
         detections=results,
     )
+
+
+# ── Tambahan importer ──────────────────────────────────────────────────────
+
+class MoveRequest(BaseModel):
+    paths:       list[str]
+    class_label: str
+    split:       str
+
+
+@app.get("/impor", response_class=HTMLResponse)
+def tambahan_page():
+    """Halaman web untuk mengimpor gambar dari traffic_sign_tambahan ke dataset."""
+    return HTMLResponse(content=build_tambahan_html(CLASS_NAMES))
+
+
+@app.get("/tambahan/api/sources")
+def tambahan_sources():
+    return list_image_sources()
+
+
+@app.get("/tambahan/api/images")
+def tambahan_images(source: str = "", page: int = 1, per_page: int = 20):
+    per_page = max(1, min(per_page, 200))
+    return get_images_page(source, page, per_page)
+
+
+@app.get("/tambahan/img/{path:path}")
+def tambahan_image(path: str):
+    img_path = (TAMBAHAN_DIR / path).resolve()
+    # Cegah path traversal
+    try:
+        img_path.relative_to(TAMBAHAN_DIR.resolve())
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Path tidak valid")
+    if not img_path.exists():
+        raise HTTPException(status_code=404, detail="Gambar tidak ditemukan")
+    return FileResponse(img_path)
+
+
+@app.post("/tambahan/move")
+def tambahan_move(req: MoveRequest):
+    if req.class_label not in CLASS_LABEL_TO_ID:
+        raise HTTPException(status_code=400, detail=f"Kelas tidak dikenal: {req.class_label}")
+    if req.split not in ("train", "test"):
+        raise HTTPException(status_code=400, detail="Split harus 'train' atau 'test'")
+    if not req.paths:
+        raise HTTPException(status_code=400, detail="Tidak ada gambar yang dipilih")
+
+    result = move_images(req.paths, req.class_label, req.split, CLASS_LABEL_TO_ID, DATA_DIR)
+    return result
 
 
 # ── Annotation tool ────────────────────────────────────────────────────────

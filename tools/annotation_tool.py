@@ -1,18 +1,22 @@
 #!/usr/bin/env python3
 """
-Annotation Tool — Tambah gambar + bounding box ke dataset traffic sign.
+Annotation Tool — Tambah/Impor gambar ke dataset traffic sign.
 
 Cara pakai:
     python tools/annotation_tool.py
 
 Keyboard:
-    Ctrl+O          Buka gambar
-    Ctrl+S          Simpan ke dataset
-    Delete          Hapus anotasi yang dipilih di list
-    Escape          Batalkan drag bbox yang sedang digambar
+    Ctrl+O          Buka gambar bebas (dari mana saja)
+    Ctrl+T          Buka dari folder traffic_sign_tambahan
+    Ctrl+S          Simpan ke dataset (mode bebas)
+    Ctrl+M          Pindahkan ke dataset (mode tambahan)
+    Left / Right    Prev / Next gambar dalam folder tambahan
+    Delete          Hapus anotasi yang dipilih
+    Escape          Batalkan drag bbox
 """
 from __future__ import annotations
 
+import shutil
 import sys
 import time
 from pathlib import Path
@@ -28,13 +32,14 @@ sys.path.insert(0, str(REPO_ROOT / "backend"))
 
 from config import CLASS_LABEL_TO_ID, CLASS_NAMES, DATA_DIR
 
-# Warna bbox berurutan per indeks anotasi
+TAMBAHAN_DIR = REPO_ROOT / "data" / "traffic_sign_tambahan"
+
 BBOX_COLORS = [
     "#e74c3c", "#2ecc71", "#3498db", "#f39c12",
     "#9b59b6", "#1abc9c", "#e67e22", "#16a085",
 ]
-MIN_BOX_PX = 8   # ukuran minimum bbox di canvas (pixel) agar tidak accidental click
-PANEL_W    = 270 # lebar panel kanan (pixel)
+MIN_BOX_PX = 8
+PANEL_W    = 270
 
 
 # ---------------------------------------------------------------------------
@@ -42,11 +47,8 @@ PANEL_W    = 270 # lebar panel kanan (pixel)
 # ---------------------------------------------------------------------------
 
 class Annotation:
-    """Satu bounding box pada gambar, beserta labelnya."""
-
     def __init__(self, label: str, box: Tuple[int, int, int, int]) -> None:
         self.label = label
-        # box = (x1, y1, x2, y2) dalam koordinat gambar asli (pixel)
         x1, y1, x2, y2 = box
         self.box: Tuple[int, int, int, int] = (
             min(x1, x2), min(y1, y2), max(x1, x2), max(y1, y2)
@@ -76,26 +78,33 @@ class AnnotationTool(tk.Tk):
     def __init__(self) -> None:
         super().__init__()
         self.title("Annotation Tool — Traffic Sign Dataset")
-        self.minsize(860, 540)
+        self.minsize(900, 560)
 
         # State gambar
-        self._image_path:  Optional[Path]             = None
-        self._orig_image:  Optional[Image.Image]      = None
+        self._image_path:  Optional[Path]              = None
+        self._orig_image:  Optional[Image.Image]       = None
         self._tk_image:    Optional[ImageTk.PhotoImage] = None
-        self._scale:       float                      = 1.0
-        self._off_x:       int                        = 0
-        self._off_y:       int                        = 0
+        self._scale:       float                       = 1.0
+        self._off_x:       int                         = 0
+        self._off_y:       int                         = 0
 
         # State drag
-        self._drag_start:   Optional[Tuple[int, int]] = None
-        self._drag_rect_id: Optional[int]             = None
+        self._drag_start:   Optional[Tuple[int, int]]  = None
+        self._drag_rect_id: Optional[int]              = None
 
         # Anotasi
         self._annotations: List[Annotation] = []
 
+        # State mode tambahan
+        self._from_tambahan:      bool        = False
+        self._tambahan_siblings:  List[Path]  = []
+        self._tambahan_idx:       int         = -1
+
         self._build_ui()
         self._bind_keys()
-        self._set_status("Buka gambar untuk mulai anotasi.  |  Ctrl+O = buka  |  Ctrl+S = simpan")
+        self._set_status(
+            "Ctrl+O = buka gambar bebas  |  Ctrl+T = buka dari Tambahan  |  Ctrl+S = simpan"
+        )
 
     # -----------------------------------------------------------------------
     # UI builder
@@ -111,11 +120,30 @@ class AnnotationTool(tk.Tk):
             bg="#3498db", fg="white", relief=tk.FLAT, padx=8, pady=3,
         ).pack(side=tk.LEFT)
 
-        self._lbl_file = tk.Label(
-            top, text="(belum ada gambar)", anchor="w",
-            fg="#bdc3c7", bg="#2c3e50", font=("", 9),
+        tk.Button(
+            top, text="  Dari Tambahan  ", command=self.cmd_open_tambahan,
+            bg="#8e44ad", fg="white", relief=tk.FLAT, padx=8, pady=3,
+        ).pack(side=tk.LEFT, padx=(6, 0))
+
+        self._btn_prev = tk.Button(
+            top, text=" ◀ Prev ", command=lambda: self.cmd_navigate(-1),
+            bg="#555", fg="white", relief=tk.FLAT, padx=6, pady=3,
+            state=tk.DISABLED,
         )
-        self._lbl_file.pack(side=tk.LEFT, padx=10, fill=tk.X, expand=True)
+        self._btn_prev.pack(side=tk.LEFT, padx=(12, 0))
+
+        self._btn_next = tk.Button(
+            top, text=" Next ▶ ", command=lambda: self.cmd_navigate(+1),
+            bg="#555", fg="white", relief=tk.FLAT, padx=6, pady=3,
+            state=tk.DISABLED,
+        )
+        self._btn_next.pack(side=tk.LEFT, padx=(2, 0))
+
+        self._lbl_nav = tk.Label(
+            top, text="", anchor="w",
+            fg="#95a5a6", bg="#2c3e50", font=("", 8),
+        )
+        self._lbl_nav.pack(side=tk.LEFT, padx=(6, 0))
 
         self._lbl_size = tk.Label(
             top, text="", anchor="e",
@@ -123,12 +151,17 @@ class AnnotationTool(tk.Tk):
         )
         self._lbl_size.pack(side=tk.RIGHT, padx=8)
 
+        self._lbl_file = tk.Label(
+            top, text="(belum ada gambar)", anchor="w",
+            fg="#bdc3c7", bg="#2c3e50", font=("", 9),
+        )
+        self._lbl_file.pack(side=tk.LEFT, padx=10, fill=tk.X, expand=True)
+
         # ── Main area ──────────────────────────────────────────────────────
         body = tk.Frame(self)
         body.pack(fill=tk.BOTH, expand=True, padx=6, pady=6)
 
-        # Canvas
-        canvas_wrap = tk.LabelFrame(body, text=" Gambar — klik-drag untuk menambah bbox ")
+        canvas_wrap = tk.LabelFrame(body, text=" Gambar — klik-drag untuk bbox ")
         canvas_wrap.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
 
         self._canvas = tk.Canvas(canvas_wrap, bg="#1a1a2e", cursor="crosshair")
@@ -143,9 +176,16 @@ class AnnotationTool(tk.Tk):
         panel.pack(side=tk.RIGHT, fill=tk.Y, padx=(6, 0))
         panel.pack_propagate(False)
 
+        # Mode indicator
+        self._lbl_mode = tk.Label(
+            panel, text="Mode: Anotasi Bebas",
+            bg="#ecf0f1", fg="#7f8c8d", font=("", 8, "italic"),
+        )
+        self._lbl_mode.pack(fill=tk.X, padx=6, pady=(4, 0))
+
         # Kelas
         frm_cls = tk.LabelFrame(panel, text=" Kelas ", padx=6, pady=6)
-        frm_cls.pack(fill=tk.X, pady=(0, 6))
+        frm_cls.pack(fill=tk.X, pady=(4, 6))
 
         self._var_class = tk.StringVar(value=CLASS_NAMES[0])
         self._cmb_class = ttk.Combobox(
@@ -165,7 +205,7 @@ class AnnotationTool(tk.Tk):
                 variable=self._var_split, value=s,
             ).pack(side=tk.LEFT, padx=10)
 
-        # Preview path
+        # Preview tujuan
         self._lbl_dest = tk.Label(
             panel, text="", anchor="w", fg="#7f8c8d",
             font=("", 8), wraplength=PANEL_W - 16, justify=tk.LEFT,
@@ -212,7 +252,16 @@ class AnnotationTool(tk.Tk):
             command=self.cmd_save,
             bg="#27ae60", fg="white",
             font=("", 10, "bold"), pady=6, relief=tk.FLAT,
-        ).pack(fill=tk.X)
+        ).pack(fill=tk.X, pady=(0, 4))
+
+        self._btn_move = tk.Button(
+            frm_btn, text="  Pindahkan ke Dataset  ",
+            command=self.cmd_move,
+            bg="#8e44ad", fg="white",
+            font=("", 10, "bold"), pady=6, relief=tk.FLAT,
+            state=tk.DISABLED,
+        )
+        self._btn_move.pack(fill=tk.X)
 
         # ── Status bar ────────────────────────────────────────────────────
         self._lbl_status = tk.Label(
@@ -226,15 +275,20 @@ class AnnotationTool(tk.Tk):
 
     def _bind_keys(self) -> None:
         self.bind("<Control-o>", lambda _: self.cmd_open())
+        self.bind("<Control-t>", lambda _: self.cmd_open_tambahan())
         self.bind("<Control-s>", lambda _: self.cmd_save())
+        self.bind("<Control-m>", lambda _: self.cmd_move())
+        self.bind("<Left>",      lambda _: self.cmd_navigate(-1))
+        self.bind("<Right>",     lambda _: self.cmd_navigate(+1))
         self.bind("<Delete>",    lambda _: self.cmd_delete_selected())
         self.bind("<Escape>",    self._cancel_drag)
 
     # -----------------------------------------------------------------------
-    # Commands
+    # Commands — buka gambar
     # -----------------------------------------------------------------------
 
     def cmd_open(self) -> None:
+        """Buka gambar sembarang (mode bebas)."""
         path = filedialog.askopenfilename(
             title="Pilih Gambar",
             filetypes=[
@@ -244,21 +298,41 @@ class AnnotationTool(tk.Tk):
         )
         if not path:
             return
+        self._load_image(Path(path), from_tambahan=False)
 
-        self._image_path = Path(path)
-        try:
-            self._orig_image = Image.open(path).convert("RGB")
-        except Exception as exc:
-            messagebox.showerror("Gagal membuka gambar", str(exc))
+    def cmd_open_tambahan(self) -> None:
+        """Buka gambar dari folder traffic_sign_tambahan."""
+        init_dir = str(TAMBAHAN_DIR) if TAMBAHAN_DIR.exists() else str(REPO_ROOT)
+        path = filedialog.askopenfilename(
+            title="Pilih Gambar dari Tambahan",
+            initialdir=init_dir,
+            filetypes=[
+                ("Gambar", "*.jpg *.jpeg *.png *.bmp *.webp"),
+                ("Semua File", "*.*"),
+            ],
+        )
+        if not path:
             return
+        p = Path(path)
+        # Bangun daftar semua gambar dalam folder yang sama untuk navigasi
+        siblings = sorted(
+            f for f in p.parent.iterdir()
+            if f.suffix.lower() in {".jpg", ".jpeg", ".png", ".bmp", ".webp"}
+        )
+        self._tambahan_siblings = siblings
+        self._tambahan_idx = siblings.index(p) if p in siblings else 0
+        self._load_image(p, from_tambahan=True)
 
-        self._annotations.clear()
-        self._refresh_listbox()
-        self._lbl_file.config(text=self._image_path.name)
-        w, h = self._orig_image.size
-        self._lbl_size.config(text=f"{w} × {h} px")
-        self._render()
-        self._set_status(f"Gambar dimuat: {self._image_path.name}  ({w}×{h} px)")
+    def cmd_navigate(self, delta: int) -> None:
+        """Pindah ke gambar prev/next dalam daftar tambahan."""
+        if not self._tambahan_siblings:
+            return
+        self._tambahan_idx = (self._tambahan_idx + delta) % len(self._tambahan_siblings)
+        self._load_image(self._tambahan_siblings[self._tambahan_idx], from_tambahan=True)
+
+    # -----------------------------------------------------------------------
+    # Commands — anotasi
+    # -----------------------------------------------------------------------
 
     def cmd_delete_selected(self) -> None:
         sel = self._listbox.curselection()
@@ -279,21 +353,155 @@ class AnnotationTool(tk.Tk):
             self._render()
             self._set_status("Semua anotasi dihapus.")
 
+    # -----------------------------------------------------------------------
+    # Commands — simpan / pindah
+    # -----------------------------------------------------------------------
+
     def cmd_save(self) -> None:
+        """Salin gambar + tulis label baru ke dataset (file sumber tidak dihapus)."""
+        if not self._validate_for_save():
+            return
+        dest_img, dest_txt = self._resolve_dest()
+        if dest_img is None:
+            return
+        try:
+            self._orig_image.save(dest_img)
+        except Exception as exc:
+            messagebox.showerror("Gagal menyimpan gambar", str(exc))
+            return
+        self._write_label(dest_txt)
+        self._show_save_success(dest_img, dest_txt, moved=False)
+
+    def cmd_move(self) -> None:
+        """Pindahkan (move) gambar + label sumber ke dataset, lalu load gambar berikutnya."""
+        if not self._from_tambahan:
+            messagebox.showinfo(
+                "Mode tidak sesuai",
+                "Tombol 'Pindahkan' hanya aktif saat gambar dibuka dari folder Tambahan.\n"
+                "Gunakan 'Simpan ke Dataset' untuk mode bebas.",
+            )
+            return
+        if not self._validate_for_save():
+            return
+        dest_img, dest_txt = self._resolve_dest()
+        if dest_img is None:
+            return
+
+        # Pindahkan gambar
+        try:
+            shutil.move(str(self._image_path), str(dest_img))
+        except Exception as exc:
+            messagebox.showerror("Gagal memindahkan gambar", str(exc))
+            return
+
+        # Hapus label sumber (kalau ada)
+        src_label = self._find_label_for(self._image_path)
+        if src_label and src_label.exists():
+            try:
+                src_label.unlink()
+            except Exception:
+                pass
+
+        # Tulis label baru
+        self._write_label(dest_txt)
+        self._show_save_success(dest_img, dest_txt, moved=True)
+
+        # Hapus dari daftar sibling, load gambar berikutnya (atau prev jika terakhir)
+        if self._image_path in self._tambahan_siblings:
+            self._tambahan_siblings.remove(self._image_path)
+
+        if not self._tambahan_siblings:
+            self._image_path  = None
+            self._orig_image  = None
+            self._annotations.clear()
+            self._refresh_listbox()
+            self._canvas.delete("all")
+            self._lbl_file.config(text="(semua gambar sudah dipindahkan)")
+            self._update_nav_state()
+            self._set_status("Semua gambar di folder ini sudah dipindahkan.")
+            return
+
+        self._tambahan_idx = min(self._tambahan_idx, len(self._tambahan_siblings) - 1)
+        self._load_image(self._tambahan_siblings[self._tambahan_idx], from_tambahan=True)
+
+    # -----------------------------------------------------------------------
+    # Core image loader
+    # -----------------------------------------------------------------------
+
+    def _load_image(self, path: Path, from_tambahan: bool) -> None:
+        try:
+            img = Image.open(path).convert("RGB")
+        except Exception as exc:
+            messagebox.showerror("Gagal membuka gambar", str(exc))
+            return
+
+        self._image_path = path
+        self._orig_image  = img
+        self._from_tambahan = from_tambahan
+        self._annotations.clear()
+
+        if from_tambahan:
+            self._load_bboxes_from_label(self._find_label_for(path))
+
+        self._refresh_listbox()
+        w, h = img.size
+        self._lbl_file.config(text=path.name)
+        self._lbl_size.config(text=f"{w} × {h} px")
+        self._render()
+        self._update_mode_ui()
+        self._update_nav_state()
+
+        bbox_info = f"  |  {len(self._annotations)} bbox dimuat dari label" if from_tambahan and self._annotations else ""
+        self._set_status(f"{'[Tambahan] ' if from_tambahan else ''}Dimuat: {path.name}  ({w}×{h} px){bbox_info}")
+
+    def _find_label_for(self, img_path: Path) -> Optional[Path]:
+        """Cari file .txt label berpasangan. Tangani struktur images/ → labels/."""
+        if img_path.parent.name == "images":
+            return img_path.parent.parent / "labels" / (img_path.stem + ".txt")
+        return img_path.with_suffix(".txt")
+
+    def _load_bboxes_from_label(self, txt_path: Optional[Path]) -> None:
+        """Baca bbox dari YOLO .txt dan tambahkan sebagai Annotation (abaikan class_id sumber)."""
+        if txt_path is None or not txt_path.exists():
+            return
+        if self._orig_image is None:
+            return
+        iw, ih = self._orig_image.size
+        label = self._var_class.get()
+        for line in txt_path.read_text(encoding="utf-8").strip().splitlines():
+            parts = line.strip().split()
+            if len(parts) < 5:
+                continue
+            try:
+                _, cx, cy, bw, bh = int(parts[0]), float(parts[1]), float(parts[2]), float(parts[3]), float(parts[4])
+            except ValueError:
+                continue
+            x1 = max(0, int((cx - bw / 2) * iw))
+            y1 = max(0, int((cy - bh / 2) * ih))
+            x2 = min(iw - 1, int((cx + bw / 2) * iw))
+            y2 = min(ih - 1, int((cy + bh / 2) * ih))
+            if x2 > x1 and y2 > y1:
+                self._annotations.append(Annotation(label, (x1, y1, x2, y2)))
+
+    # -----------------------------------------------------------------------
+    # Save helpers
+    # -----------------------------------------------------------------------
+
+    def _validate_for_save(self) -> bool:
         if self._orig_image is None or self._image_path is None:
             messagebox.showwarning("Tidak ada gambar", "Buka gambar terlebih dahulu.")
-            return
+            return False
         if not self._annotations:
             messagebox.showwarning("Tidak ada anotasi", "Tambahkan minimal satu bounding box.")
-            return
+            return False
+        return True
 
+    def _resolve_dest(self) -> Tuple[Optional[Path], Optional[Path]]:
         label = self._var_class.get()
         split = self._var_split.get()
-
         dest_dir = DATA_DIR / split / label
         dest_dir.mkdir(parents=True, exist_ok=True)
 
-        # Nama file unik — hindari tabrakan dengan yang sudah ada
         suffix = self._image_path.suffix.lower()
         if suffix not in {".jpg", ".jpeg", ".png", ".bmp"}:
             suffix = ".jpg"
@@ -303,39 +511,60 @@ class AnnotationTool(tk.Tk):
         while dest_img.exists():
             ts += 1
             dest_img = dest_dir / f"{stem}_{ts}{suffix}"
+        return dest_img, dest_img.with_suffix(".txt")
 
-        # Simpan gambar
-        try:
-            self._orig_image.save(dest_img)
-        except Exception as exc:
-            messagebox.showerror("Gagal menyimpan gambar", str(exc))
-            return
-
-        # Tulis anotasi YOLO — semua bbox pakai class_id dari label folder
+    def _write_label(self, dest_txt: Path) -> None:
+        label = self._var_class.get()
         iw, ih = self._orig_image.size
-        lines = []
-        for ann in self._annotations:
-            # Override label ke class yang dipilih agar konsisten dengan folder
-            forced = Annotation(label, ann.box)
-            lines.append(forced.to_yolo_line(iw, ih))
-
-        dest_txt = dest_img.with_suffix(".txt")
+        lines = [Annotation(label, ann.box).to_yolo_line(iw, ih) for ann in self._annotations]
         dest_txt.write_text("\n".join(lines), encoding="utf-8")
 
+    def _show_save_success(self, dest_img: Path, dest_txt: Path, moved: bool) -> None:
+        action = "Dipindahkan" if moved else "Tersimpan"
         rel = dest_img.relative_to(REPO_ROOT)
         messagebox.showinfo(
-            "Tersimpan",
-            f"Gambar dan label berhasil disimpan.\n\n"
+            action,
+            f"Gambar dan label berhasil {'dipindahkan' if moved else 'disimpan'}.\n\n"
             f"File  : {rel}\n"
-            f"Kelas : {label}\n"
-            f"Split : {split}\n"
-            f"BBox  : {len(self._annotations)} anotasi\n\n"
-            f"Label YOLO ditulis ke:\n{dest_txt.name}",
+            f"Kelas : {self._var_class.get()}\n"
+            f"Split : {self._var_split.get()}\n"
+            f"BBox  : {len(self._annotations)} anotasi",
         )
         self._set_status(
-            f"Tersimpan → {dest_img.name}  |  "
-            f"kelas={label}  split={split}  bbox={len(self._annotations)}"
+            f"{action} → {dest_img.name}  |  "
+            f"kelas={self._var_class.get()}  split={self._var_split.get()}  "
+            f"bbox={len(self._annotations)}"
         )
+
+    # -----------------------------------------------------------------------
+    # UI state helpers
+    # -----------------------------------------------------------------------
+
+    def _update_mode_ui(self) -> None:
+        if self._from_tambahan:
+            self._lbl_mode.config(
+                text="Mode: Impor dari Tambahan",
+                fg="#8e44ad", font=("", 8, "bold italic"),
+            )
+            self._btn_move.config(state=tk.NORMAL)
+        else:
+            self._lbl_mode.config(
+                text="Mode: Anotasi Bebas",
+                fg="#7f8c8d", font=("", 8, "italic"),
+            )
+            self._btn_move.config(state=tk.DISABLED)
+
+    def _update_nav_state(self) -> None:
+        if self._tambahan_siblings:
+            total = len(self._tambahan_siblings)
+            cur   = self._tambahan_idx + 1
+            self._btn_prev.config(state=tk.NORMAL)
+            self._btn_next.config(state=tk.NORMAL)
+            self._lbl_nav.config(text=f"{cur}/{total}")
+        else:
+            self._btn_prev.config(state=tk.DISABLED)
+            self._btn_next.config(state=tk.DISABLED)
+            self._lbl_nav.config(text="")
 
     # -----------------------------------------------------------------------
     # Canvas rendering
@@ -375,12 +604,10 @@ class AnnotationTool(tk.Tk):
             cx1, cy1 = self._img_to_canvas(ann.box[0], ann.box[1])
             cx2, cy2 = self._img_to_canvas(ann.box[2], ann.box[3])
             width = 3 if i == selected_idx else 2
-
             self._canvas.create_rectangle(
                 cx1, cy1, cx2, cy2,
                 outline=color, width=width, tags="bbox",
             )
-            # Label pill
             short = ann.label.split("-")[-1]
             pill_x2 = cx1 + len(short) * 7 + 14
             pill_y1 = cy1 - 18
@@ -413,7 +640,6 @@ class AnnotationTool(tk.Tk):
             sx, sy, event.x, event.y,
             outline="#f1c40f", width=2, dash=(5, 3),
         )
-        # Tampilkan ukuran box sementara di status bar
         ix1, iy1 = self._canvas_to_img(min(sx, event.x), min(sy, event.y))
         ix2, iy2 = self._canvas_to_img(max(sx, event.x), max(sy, event.y))
         self._set_status(
@@ -425,19 +651,17 @@ class AnnotationTool(tk.Tk):
         if self._drag_start is None or self._orig_image is None:
             return
         sx, sy = self._drag_start
-        self._drag_start    = None
+        self._drag_start = None
         if self._drag_rect_id is not None:
             self._canvas.delete(self._drag_rect_id)
             self._drag_rect_id = None
 
-        # Abaikan klik tanpa drag
         if abs(event.x - sx) < MIN_BOX_PX or abs(event.y - sy) < MIN_BOX_PX:
-            self._set_status("Bbox terlalu kecil, diabaikan.  Klik-drag lebih jauh.")
+            self._set_status("Bbox terlalu kecil, diabaikan.")
             return
 
         ix1, iy1 = self._canvas_to_img(min(sx, event.x), min(sy, event.y))
         ix2, iy2 = self._canvas_to_img(max(sx, event.x), max(sy, event.y))
-
         ann = Annotation(self._var_class.get(), (ix1, iy1, ix2, iy2))
         self._annotations.append(ann)
         self._refresh_listbox()
@@ -473,7 +697,7 @@ class AnnotationTool(tk.Tk):
         return x, y
 
     # -----------------------------------------------------------------------
-    # Helpers
+    # Misc helpers
     # -----------------------------------------------------------------------
 
     def _refresh_listbox(self) -> None:
