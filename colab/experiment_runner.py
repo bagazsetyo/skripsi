@@ -515,10 +515,22 @@ def main_for_preset(default_preset: str) -> None:
     output_name = args.output_name or preset.output_name
     output_dir = Path(args.drive_output_root) / output_name
 
-    print(
-        f"[INFO] Menjalankan preset {preset.preset_key} | "
-        f"image_size={preset.image_size} | output={output_dir}"
-    )
+    print("[CONFIG] ================================================")
+    print(f"[CONFIG] Preset        : {preset.preset_key}")
+    print(f"[CONFIG] Model         : {args.model_name}")
+    print(f"[CONFIG] Image Size    : {preset.image_size} px")
+    print(f"[CONFIG] Batch Size    : {preset.batch_size}")
+    print(f"[CONFIG] Epochs        : {preset.epochs}")
+    print(f"[CONFIG] Learning Rate : {preset.learning_rate:.0e}")
+    print(f"[CONFIG] LR Warmup     : {preset.warmup_epochs} epoch")
+    print(f"[CONFIG] LR Scheduler  : {'Cosine Decay' if preset.cosine_decay else 'Step LR'}")
+    print(f"[CONFIG] Weight Decay  : {preset.weight_decay}")
+    print(f"[CONFIG] Grad Clipping : {preset.grad_clip}")
+    print(f"[CONFIG] Score Thresh  : {preset.score_threshold}")
+    print(f"[CONFIG] Mixed Prec.   : {'Ya (AMP)' if preset.use_amp else 'Tidak'}")
+    print(f"[CONFIG] Num Workers   : {preset.num_workers}")
+    print(f"[CONFIG] Output Dir    : {output_dir}")
+    print("[CONFIG] ================================================")
     summary = run_experiment(
         preset,
         dataset_dir=dataset_dir,

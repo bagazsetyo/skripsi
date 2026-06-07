@@ -2,4 +2,4 @@ from experiment_runner import main_for_preset
 
 
 if __name__ == "__main__":
-    main_for_preset("img700")
+    main_for_preset("small-img700")
