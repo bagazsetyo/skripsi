@@ -150,14 +150,14 @@ PRESETS: dict[str, ExperimentPreset] = {
         num_workers=4,
         use_amp=True,
     ),
-    # small-img700: bs=2 di A100 (~50GB est.), ~12 jam. Epoch 30 karena tiap epoch
-    # ~1.85x lebih lambat dari img600 (patch ViT lebih banyak: 1914 vs 1406).
+    # small-img700: bs=2 di A100 (~46-50GB terukur), ~8.8 jam. Per-epoch ~793s,
+    # hampir sama dengan img600 (~788s) — bottleneck bukan di attention tapi I/O.
     "small-img700": ExperimentPreset(
         preset_key="small-img700",
         run_name="yolos-small-image-700",
         output_name="yolos-small-image-700",
         image_size=700,
-        epochs=30,
+        epochs=40,
         batch_size=2,
         learning_rate=0.00005,
         weight_decay=0.0001,
