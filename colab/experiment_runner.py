@@ -106,18 +106,20 @@ PRESETS: dict[str, ExperimentPreset] = {
         use_amp=True,
     ),
     # --- Preset yolos-small ---
-    # VRAM yolos-small ~2.2x yolos-tiny.
-    # L4 (24GB): small-img500/600 aman; small-img700 OOM (est. ~28GB bs=1).
-    # A100 (80GB): semua small preset aman termasuk small-img700.
-    # small-img500: bs=2 aman di L4 (~17GB), ~4-5 jam di L4
+    # VRAM terukur di A100: small-img700 bs=1 ~25GB.
+    # small-img500 bs=1 est. ~13GB VRAM (skala patch²: 976²/1914²).
+    # small-img600 bs=1 est. ~18GB VRAM.
+    # bs=2 untuk img500 OOM di A100 — diduga CPU RAM habis (DataLoader prefetch),
+    # bukan VRAM. Semua small preset pakai bs=1 untuk konsistensi.
+    # small-img500: bs=2 di A100 (~35GB est.), ~8 jam. Config identik dengan img600 aktual.
     "small-img500": ExperimentPreset(
         preset_key="small-img500",
         run_name="yolos-small-image-500",
         output_name="yolos-small-image-500",
         image_size=500,
-        epochs=35,
+        epochs=40,
         batch_size=2,
-        learning_rate=0.00003,
+        learning_rate=0.00005,
         weight_decay=0.0001,
         score_threshold=0.3,
         lr_step=0,
@@ -128,40 +130,41 @@ PRESETS: dict[str, ExperimentPreset] = {
         num_workers=4,
         use_amp=True,
     ),
-    # small-img600: bs=1 aman di L4 (~16GB), ~6.5 jam di L4
+    # small-img600: bs=2 terukur ~43GB VRAM di A100, ~8.75 jam (40 epoch).
+    # Config ini sesuai dengan model yolos-600---small-latest yang sudah di-training (mAP 92%).
     "small-img600": ExperimentPreset(
         preset_key="small-img600",
         run_name="yolos-small-image-600",
         output_name="yolos-small-image-600",
         image_size=600,
-        epochs=30,
-        batch_size=1,
-        learning_rate=0.00003,
+        epochs=40,
+        batch_size=2,
+        learning_rate=0.00005,
         weight_decay=0.0001,
         score_threshold=0.3,
         lr_step=0,
         lr_gamma=0.5,
-        warmup_epochs=3,
+        warmup_epochs=4,
         cosine_decay=True,
         grad_clip=0.1,
         num_workers=4,
         use_amp=True,
     ),
-    # small-img700: butuh A100 (80GB). bs=1 est. ~28GB VRAM. ~8-9 jam di A100.
-    # Tiap epoch lebih lambat dari img600 karena patch ViT lebih banyak (~1.9x patches).
+    # small-img700: bs=2 di A100 (~50GB est.), ~12 jam. Epoch 30 karena tiap epoch
+    # ~1.85x lebih lambat dari img600 (patch ViT lebih banyak: 1914 vs 1406).
     "small-img700": ExperimentPreset(
         preset_key="small-img700",
         run_name="yolos-small-image-700",
         output_name="yolos-small-image-700",
         image_size=700,
-        epochs=25,
-        batch_size=1,
-        learning_rate=0.00003,
+        epochs=30,
+        batch_size=2,
+        learning_rate=0.00005,
         weight_decay=0.0001,
         score_threshold=0.3,
         lr_step=0,
         lr_gamma=0.5,
-        warmup_epochs=3,
+        warmup_epochs=4,
         cosine_decay=True,
         grad_clip=0.1,
         num_workers=4,
