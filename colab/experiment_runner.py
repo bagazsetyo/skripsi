@@ -354,10 +354,10 @@ def import_training_modules():
     from torch.utils.data import DataLoader
     from transformers import YolosImageProcessor
 
-    from config import CLASS_NAMES
-    from dataset import TrafficSignDataset, collate_fn
-    from evaluation import evaluate_model
-    from training_core import build_model, train_one_epoch
+    from core.config import CLASS_NAMES
+    from services.dataset import TrafficSignDataset, collate_fn
+    from services.evaluation import evaluate_model
+    from services.training_core import build_model, train_one_epoch
 
     return {
         "torch": torch,

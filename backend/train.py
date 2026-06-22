@@ -6,9 +6,9 @@ import torch
 from torch.utils.data import DataLoader
 from transformers import YolosImageProcessor
 
-from config import CLASS_NAMES, DATA_DIR, MODEL_DIR
-from dataset import TrafficSignDataset, collate_fn
-from training_core import build_model, train_one_epoch
+from core.config import CLASS_NAMES, DATA_DIR, MODEL_DIR
+from services.dataset import TrafficSignDataset, collate_fn
+from services.training_core import build_model, train_one_epoch
 
 
 def main():

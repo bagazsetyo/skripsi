@@ -7,7 +7,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
-from config import REGISTRY_DB_PATH
+from core.config import REGISTRY_DB_PATH
 
 
 def utc_now() -> str:

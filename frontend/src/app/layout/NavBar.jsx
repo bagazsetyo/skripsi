@@ -2,11 +2,9 @@ import {
   LoginOutlined,
   DatabaseOutlined,
   DashboardOutlined,
-  DeploymentUnitOutlined,
   LogoutOutlined,
-  RadarChartOutlined,
+  VideoCameraOutlined,
   RocketOutlined,
-  ReadOutlined,
 } from "@ant-design/icons";
 import { Layout, Menu, Typography } from "antd";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -20,9 +18,7 @@ export function AppNavBar() {
   const { isAuthenticated, logout } = useAuth();
 
   const menuItems = [
-    { key: "/prediction", icon: <RadarChartOutlined />, label: "Prediksi" },
-    { key: "/guide", icon: <ReadOutlined />, label: "User Guide" },
-    { key: "/method", icon: <DeploymentUnitOutlined />, label: "Cara Kerja YOLOS" },
+    { key: "/prediction", icon: <VideoCameraOutlined />, label: "Prediksi" },
     ...(isAuthenticated
       ? [
           { type: "divider" },

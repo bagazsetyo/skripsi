@@ -7,11 +7,11 @@ from torch.utils.data import DataLoader
 from transformers import YolosImageProcessor
 
 from app.schemas import TrainingRequest
-from config import DATA_DIR, MODELS_ROOT
-from dataset import TrafficSignDataset, collate_fn
-from db import create_training_run, update_training_run, upsert_model, utc_now
-from evaluation import evaluate_model
-from training_core import build_model, train_one_epoch
+from core.config import DATA_DIR, MODELS_ROOT
+from core.db import create_training_run, update_training_run, upsert_model, utc_now
+from services.dataset import TrafficSignDataset, collate_fn
+from services.evaluation import evaluate_model
+from services.training_core import build_model, train_one_epoch
 
 
 def _build_scheduler(
@@ -23,7 +23,6 @@ def _build_scheduler(
     lr_gamma: float,
 ):
     if warmup_epochs > 0 and cosine_decay:
-        # Linear warmup kemudian cosine annealing
         def warmup_lr_lambda(epoch: int) -> float:
             if epoch < warmup_epochs:
                 return float(epoch + 1) / float(warmup_epochs)

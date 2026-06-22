@@ -8,7 +8,7 @@ from typing import Any
 
 from fastapi import Header, HTTPException
 
-from config import ADMIN_PASSWORD, ADMIN_USERNAME, AUTH_SECRET_KEY
+from core.config import ADMIN_PASSWORD, ADMIN_USERNAME, AUTH_SECRET_KEY
 
 
 def _b64encode(data: bytes) -> str:

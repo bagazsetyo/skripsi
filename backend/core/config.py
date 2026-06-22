@@ -1,9 +1,8 @@
 import os
-import secrets
 from dataclasses import dataclass
 from pathlib import Path
 
-PROJECT_ROOT = Path(__file__).resolve().parent
+PROJECT_ROOT = Path(__file__).resolve().parent.parent
 REPO_ROOT = PROJECT_ROOT.parent
 
 DATA_ROOT = Path(os.getenv("DATA_ROOT", REPO_ROOT / "data"))
@@ -34,8 +33,6 @@ class TrafficSignClass:
     directory: str
 
 
-# Kelas yang sementara dikecualikan dari training (folder tetap ada di disk).
-# Untuk mengaktifkan kembali: kosongkan set ini.
 EXCLUDED_CLASS_LABELS: frozenset[str] = frozenset({
     "lampu-hijau",
     "lampu-kuning",
@@ -66,7 +63,6 @@ _ALL_TRAFFIC_SIGN_CLASSES = [
     TrafficSignClass(20, "petunjuk-penyeberangan-pejalan-kaki",                         "petunjuk-penyeberangan-pejalan-kaki"),
 ]
 
-# Re-index class ID mulai 0 setelah membuang kelas yang dikecualikan
 TRAFFIC_SIGN_CLASSES = [
     TrafficSignClass(new_id, c.label, c.directory)
     for new_id, c in enumerate(

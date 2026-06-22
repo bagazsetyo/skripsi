@@ -2,8 +2,8 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from config import CLASS_NAMES, MODEL_NAME, MODEL_PATH
-from db import get_active_model, get_model, init_db, set_active_model, upsert_model
+from core.config import CLASS_NAMES, MODEL_NAME, MODEL_PATH
+from core.db import get_active_model, get_model, init_db, set_active_model, upsert_model
 
 
 def _register_default_model_as_active() -> dict | None:

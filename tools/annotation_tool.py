@@ -30,7 +30,7 @@ from PIL import Image, ImageTk
 REPO_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO_ROOT / "backend"))
 
-from config import CLASS_LABEL_TO_ID, CLASS_NAMES, DATA_DIR
+from core.config import CLASS_LABEL_TO_ID, CLASS_NAMES, DATA_DIR
 
 TAMBAHAN_DIR = REPO_ROOT / "data" / "traffic_sign_tambahan"
 

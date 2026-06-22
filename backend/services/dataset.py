@@ -75,7 +75,6 @@ def _yolo_to_xywh(values: List[float], width: int, height: int) -> List[float]:
 
 
 def _augment_image(image: Image.Image) -> Image.Image:
-    # ColorJitter: brightness, contrast, saturation, hue
     brightness = random.uniform(0.7, 1.3)
     contrast = random.uniform(0.7, 1.3)
     saturation = random.uniform(0.8, 1.2)
@@ -86,10 +85,8 @@ def _augment_image(image: Image.Image) -> Image.Image:
     image = ImageEnhance.Contrast(image).enhance(contrast)
     image = ImageEnhance.Color(image).enhance(saturation)
 
-    # Hue shift via HSV conversion
     if abs(hue_shift) > 0.01:
         import colorsys
-        r_vals, g_vals, b_vals = [], [], []
         pixels = list(image.getdata())
         new_pixels = []
         for r, g, b in pixels:
@@ -99,12 +96,10 @@ def _augment_image(image: Image.Image) -> Image.Image:
             new_pixels.append((int(nr * 255), int(ng * 255), int(nb * 255)))
         image.putdata(new_pixels)
 
-    # Random GaussianBlur (30% chance)
     if random.random() < 0.3:
         radius = random.uniform(0.5, 1.5)
         image = image.filter(ImageFilter.GaussianBlur(radius=radius))
 
-    # Random grayscale (10% chance) — robustness terhadap variasi warna
     if random.random() < 0.1:
         gray = image.convert("L")
         image = Image.merge("RGB", (gray, gray, gray))
@@ -116,7 +111,6 @@ class TrafficSignDataset:
     def __init__(self, root_dir: Path, split: str, class_names: List[str], augment: bool | None = None):
         self.split_dir = Path(root_dir) / split
         self.class_names = class_names
-        # Augmentasi hanya aktif di split training secara default
         self.augment = split == "train" if augment is None else augment
         self.class_to_yolo, self.yolo_to_label = build_class_maps(
             self.split_dir, class_names

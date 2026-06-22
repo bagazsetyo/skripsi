@@ -90,7 +90,6 @@ def evaluate_model(
                     }
                 )
 
-    # confusion_matrix[pred_class][gt_class] = jumlah prediksi pred_class yang match ke GT gt_class
     n_classes = len(class_names)
     confusion_matrix: list[list[int]] = [[0] * n_classes for _ in range(n_classes)]
 
@@ -129,12 +128,9 @@ def evaluate_model(
                 tp[idx] = 1
                 matched_gt[key].add(best_gt_index)
                 matched_ious.append(best_iou)
-                # Catat di confusion matrix: prediksi class_id cocok ke GT class_id
                 confusion_matrix[class_id][class_id] += 1
             else:
                 fp[idx] = 1
-                # Coba cari GT kelas lain di gambar yang sama yang IoU-nya tinggi
-                # (prediksi benar secara lokasi tapi salah kelas)
                 best_cross_iou = 0.0
                 best_cross_gt_class = -1
                 for other_class_id in range(n_classes):
@@ -147,7 +143,6 @@ def evaluate_model(
                             best_cross_iou = iou
                             best_cross_gt_class = other_class_id
                 if best_cross_iou >= iou_threshold and best_cross_gt_class >= 0:
-                    # Prediksi class_id, tapi GT-nya best_cross_gt_class
                     confusion_matrix[class_id][best_cross_gt_class] += 1
 
         tp_cumsum = np.cumsum(tp)
@@ -189,7 +184,6 @@ def evaluate_model(
         else 0.0
     )
 
-    # Bangun ringkasan konfusi antar kelas untuk kemudahan diagnosis
     confusion_pairs: list[dict[str, Any]] = []
     for pred_id in range(n_classes):
         for gt_id in range(n_classes):

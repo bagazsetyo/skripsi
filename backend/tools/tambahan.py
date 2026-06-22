@@ -8,7 +8,9 @@ import shutil
 import time
 from pathlib import Path
 
-REPO_ROOT    = Path(__file__).resolve().parents[2]
+from core.config import PROJECT_ROOT
+
+REPO_ROOT = PROJECT_ROOT.parent
 TAMBAHAN_DIR = REPO_ROOT / "data" / "traffic_sign_tambahan"
 
 _IMG_EXTS = {".jpg", ".jpeg", ".png", ".bmp", ".webp"}
@@ -33,7 +35,7 @@ def _parse_bboxes(txt_path: Path | None) -> list[list[float]]:
         parts = line.strip().split()
         if len(parts) >= 5:
             try:
-                bboxes.append([float(p) for p in parts[1:5]])  # cx cy w h
+                bboxes.append([float(p) for p in parts[1:5]])
             except ValueError:
                 pass
     return bboxes
@@ -115,7 +117,6 @@ def move_images(
             errors.append(f"Tidak ada bbox: {rel_str}")
             continue
 
-        # Tentukan nama tujuan (hindari tabrakan)
         suffix = img_path.suffix.lower()
         if suffix not in {".jpg", ".jpeg", ".png", ".bmp"}:
             suffix = ".jpg"
@@ -125,14 +126,12 @@ def move_images(
             ts += 1
             dest_img = dest_dir / f"{img_path.stem}_{ts}{suffix}"
 
-        # Pindahkan gambar
         try:
             shutil.move(str(img_path), str(dest_img))
         except Exception as exc:
             errors.append(f"Gagal pindah {rel_str}: {exc}")
             continue
 
-        # Hapus label sumber
         src_label = _find_label_for(img_path)
         if src_label and src_label.exists():
             try:
@@ -140,7 +139,6 @@ def move_images(
             except Exception:
                 pass
 
-        # Tulis label baru (class_id baru sesuai kelas yang dipilih)
         lines = [f"{class_id} {cx:.6f} {cy:.6f} {bw:.6f} {bh:.6f}" for cx, cy, bw, bh in bboxes]
         dest_img.with_suffix(".txt").write_text("\n".join(lines), encoding="utf-8")
         moved += 1
@@ -288,7 +286,6 @@ let totPages = 1;
 let perPage  = 50;
 let pageImgs = [];
 
-// ── Init ──────────────────────────────────────────────────────────────────
 async function init() {{
   try {{
     const res = await fetch('/tambahan/api/sources');
@@ -305,7 +302,6 @@ async function init() {{
   }} catch(e) {{ showToast('Gagal memuat sumber: ' + e.message, true); }}
 }}
 
-// ── Load page ─────────────────────────────────────────────────────────────
 async function loadPage(page) {{
   document.getElementById('grid').innerHTML = '<div class="empty">Memuat...</div>';
   const p = new URLSearchParams({{ source: curSrc, page, per_page: perPage }});
@@ -321,7 +317,6 @@ async function loadPage(page) {{
   renderPagination();
 }}
 
-// ── Grid ──────────────────────────────────────────────────────────────────
 function renderGrid(imgs) {{
   const grid = document.getElementById('grid');
   grid.innerHTML = '';
@@ -378,7 +373,6 @@ function toggleCard(card, path) {{
   updateUI();
 }}
 
-// ── Selection ─────────────────────────────────────────────────────────────
 function selectPage() {{
   pageImgs.forEach(i => selected.add(i.path));
   document.querySelectorAll('.card').forEach(c => c.classList.add('selected'));
@@ -399,7 +393,6 @@ function updateUI() {{
   document.getElementById('moveBtn').disabled = selected.size === 0;
 }}
 
-// ── Move ──────────────────────────────────────────────────────────────────
 async function moveSelected() {{
   if (!selected.size) return;
   const cls   = document.getElementById('clsSel').value;
@@ -430,7 +423,6 @@ async function moveSelected() {{
   btn.textContent = 'Pindahkan ke Dataset ▶';
 }}
 
-// ── Pagination ────────────────────────────────────────────────────────────
 function renderPagination() {{
   const el = document.getElementById('pagination');
   el.innerHTML = '';
@@ -476,7 +468,6 @@ function pRange(cur, tot, max) {{
   return r;
 }}
 
-// ── Source/perPage change ──────────────────────────────────────────────────
 function onSourceChange() {{
   curSrc = document.getElementById('srcSel').value;
   selected.clear(); updateUI(); loadPage(1);
@@ -486,7 +477,6 @@ function onPerPageChange() {{
   selected.clear(); updateUI(); loadPage(1);
 }}
 
-// ── Toast ─────────────────────────────────────────────────────────────────
 function showToast(msg, isErr) {{
   const t=document.getElementById('toast');
   t.textContent=msg; t.className='toast'+(isErr?' err':'');

@@ -52,3 +52,6 @@ uploads/
 # Local instruction / scratch files
 AGENTS.md
 ERRORS.md
+
+# Context 
+context/

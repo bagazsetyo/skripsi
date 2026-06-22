@@ -3,26 +3,15 @@ from __future__ import annotations
 from dataclasses import asdict, dataclass
 from pathlib import Path
 
-try:
-    from config import (
-        CLASS_DIRECTORY_TO_ID,
-        CLASS_DIRECTORY_TO_LABEL,
-        DATA_DIR,
-        TEST_DIR,
-        TRAFFIC_SIGN_CLASSES,
-        TRAIN_DIR,
-    )
-    from dataset import IMAGE_EXTS
-except ModuleNotFoundError:
-    from backend.config import (
-        CLASS_DIRECTORY_TO_ID,
-        CLASS_DIRECTORY_TO_LABEL,
-        DATA_DIR,
-        TEST_DIR,
-        TRAFFIC_SIGN_CLASSES,
-        TRAIN_DIR,
-    )
-    from backend.dataset import IMAGE_EXTS
+from core.config import (
+    CLASS_DIRECTORY_TO_ID,
+    CLASS_DIRECTORY_TO_LABEL,
+    DATA_DIR,
+    TEST_DIR,
+    TRAFFIC_SIGN_CLASSES,
+    TRAIN_DIR,
+)
+from services.dataset import IMAGE_EXTS, _read_yolo_ids
 
 
 @dataclass(frozen=True)
@@ -53,7 +42,8 @@ def _count_annotations(label_path: Path) -> int:
 
 
 def _validate_yolo_line(
-    line: str, split_name: str, class_dir: Path, label_path: Path
+    line: str, split_name: str, class_dir: Path, label_path: Path,
+    expected_yolo_id: int | None = None,
 ) -> list[ValidationIssue]:
     issues: list[ValidationIssue] = []
     stripped = line.strip()
@@ -88,14 +78,14 @@ def _validate_yolo_line(
         )
         return issues
 
-    if class_id not in {item.class_id for item in TRAFFIC_SIGN_CLASSES}:
+    if expected_yolo_id is not None and class_id != expected_yolo_id:
         issues.append(
             ValidationIssue(
                 split=split_name,
                 directory=class_dir.name,
                 file=label_path.name,
                 issue_type="invalid_class_id",
-                detail=f"class_id {class_id} is not registered",
+                detail=f"class_id {class_id} does not match expected {expected_yolo_id} for this directory",
             )
         )
 
@@ -180,6 +170,15 @@ def scan_split(split_dir: Path) -> dict:
     }
 
 
+def _infer_expected_yolo_id(class_dir: Path) -> int | None:
+    yolo_ids: set[int] = set()
+    for label_path in class_dir.glob("*.txt"):
+        yolo_ids.update(_read_yolo_ids(label_path))
+    if len(yolo_ids) == 1:
+        return next(iter(yolo_ids))
+    return None
+
+
 def validate_split(split_dir: Path) -> dict:
     issues: list[ValidationIssue] = []
 
@@ -187,6 +186,8 @@ def validate_split(split_dir: Path) -> dict:
         class_dir = split_dir / traffic_sign_class.directory
         if not class_dir.exists():
             continue
+
+        expected_yolo_id = _infer_expected_yolo_id(class_dir)
 
         image_files = {
             path.stem: path.name
@@ -239,7 +240,7 @@ def validate_split(split_dir: Path) -> dict:
 
             for line in non_empty_lines:
                 issues.extend(
-                    _validate_yolo_line(line, split_dir.name, class_dir, label_path)
+                    _validate_yolo_line(line, split_dir.name, class_dir, label_path, expected_yolo_id)
                 )
 
     issue_dicts = [asdict(issue) for issue in issues]

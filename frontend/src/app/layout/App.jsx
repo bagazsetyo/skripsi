@@ -14,7 +14,6 @@ function App() {
       <Layout>
         <Header className="app-header">
           <div>
-            <Typography.Text className="header-kicker">Prototype System</Typography.Text>
             <Typography.Title level={4} className="header-title">
               {location.pathname === "/dataset"
                 ? "Dataset Workspace"
@@ -24,11 +23,11 @@ function App() {
                     ? "Prediction Workspace"
                     : location.pathname === "/login"
                       ? "Login Admin"
-                    : location.pathname === "/guide"
-                      ? "Panduan Penggunaan Aplikasi"
-                      : location.pathname === "/method"
-                        ? "Penjelasan Vision Transformer / YOLOS"
-                    : "Implementasi Aplikasi Skripsi"}
+                      : location.pathname === "/guide"
+                        ? "Panduan Penggunaan Aplikasi"
+                        : location.pathname === "/method"
+                          ? "Penjelasan Vision Transformer / YOLOS"
+                          : "Implementasi Aplikasi Skripsi"}
             </Typography.Title>
           </div>
         </Header>

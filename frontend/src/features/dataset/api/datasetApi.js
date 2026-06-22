@@ -17,4 +17,10 @@ export const datasetApi = {
     const response = await agent.post("/dataset/refresh");
     return response.data;
   },
+  getImages: async ({ split, classLabel, page = 1, perPage = 30 }) => {
+    const response = await agent.get("/dataset/images", {
+      params: { split, class_label: classLabel, page, per_page: perPage },
+    });
+    return response.data;
+  },
 };

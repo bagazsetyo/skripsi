@@ -9,8 +9,8 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any
 
-from config import MODELS_ROOT
-from db import upsert_model
+from core.config import MODELS_ROOT
+from core.db import upsert_model
 
 
 REQUIRED_MODEL_FILES = ("config.json", "preprocessor_config.json")

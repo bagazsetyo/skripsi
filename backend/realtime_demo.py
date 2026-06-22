@@ -10,12 +10,12 @@ from PIL import Image
 import torch
 
 from app.inference import Predictor
-from config import CLASS_NAMES, SCORE_THRESHOLD
-from model_registry import ensure_default_model_registered, resolve_active_model_path
+from core.config import CLASS_NAMES, SCORE_THRESHOLD
+from services.model_registry import ensure_default_model_registered, resolve_active_model_path
 
 try:
     import cv2
-except ImportError as exc:  # pragma: no cover - runtime dependency guard
+except ImportError as exc:
     raise SystemExit(
         "OpenCV belum terpasang. Install dependency backend dulu, termasuk opencv-python."
     ) from exc
@@ -130,7 +130,6 @@ def enqueue_latest_frame(frame_queue: queue.Queue, frame) -> None:
     try:
         frame_queue.put_nowait(frame)
     except queue.Full:
-        # Kondisi balapan kecil bisa terjadi. Jika masih penuh, abaikan saja.
         pass
 
 
