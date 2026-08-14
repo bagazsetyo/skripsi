@@ -107,6 +107,32 @@ def _augment_image(image: Image.Image) -> Image.Image:
     return image
 
 
+def _rotate_and_flip(
+    image: Image.Image, parts: List[List[float]]
+) -> Tuple[Image.Image, List[List[float]]]:
+    # 50% chance: random rotation (90°/180°/270°) — bbox ikut ditransformasi
+    if random.random() < 0.5:
+        angle = random.choice([90, 180, 270])
+        image = image.rotate(angle, expand=True)
+        new_parts = []
+        for p in parts:
+            cid, xc, yc, bw, bh = p[0], p[1], p[2], p[3], p[4]
+            if angle == 90:    # CCW: (xc,yc) → (yc, 1-xc), w↔h
+                new_parts.append([cid, yc, 1 - xc, bh, bw])
+            elif angle == 180:  # (xc,yc) → (1-xc, 1-yc)
+                new_parts.append([cid, 1 - xc, 1 - yc, bw, bh])
+            else:               # 270° CCW = 90° CW: (xc,yc) → (1-yc, xc), w↔h
+                new_parts.append([cid, 1 - yc, xc, bh, bw])
+        parts = new_parts
+
+    # 30% chance: horizontal flip — bbox x di-mirror
+    if random.random() < 0.3:
+        image = image.transpose(Image.FLIP_LEFT_RIGHT)
+        parts = [[p[0], 1 - p[1], p[2], p[3], p[4]] for p in parts]
+
+    return image, parts
+
+
 class TrafficSignDataset:
     def __init__(self, root_dir: Path, split: str, class_names: List[str], augment: bool | None = None):
         self.split_dir = Path(root_dir) / split
@@ -123,18 +149,24 @@ class TrafficSignDataset:
     def __getitem__(self, index: int):
         image_path, label_path = self.items[index]
         image = Image.open(image_path).convert("RGB")
-        if self.augment:
-            image = _augment_image(image)
-        width, height = image.size
 
-        annotations: List[Dict[str, float]] = []
+        raw_parts: List[List[float]] = []
         for line in label_path.read_text().splitlines():
             line = line.strip()
             if not line:
                 continue
             parts = [float(x) for x in line.split()]
-            if len(parts) < 5:
-                continue
+            if len(parts) >= 5:
+                raw_parts.append(parts)
+
+        if self.augment:
+            image = _augment_image(image)
+            image, raw_parts = _rotate_and_flip(image, raw_parts)
+
+        width, height = image.size
+
+        annotations: List[Dict[str, float]] = []
+        for parts in raw_parts:
             yolo_id = int(parts[0])
             if yolo_id not in self.yolo_to_label:
                 continue
