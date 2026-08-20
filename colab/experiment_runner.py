@@ -150,6 +150,27 @@ PRESETS: dict[str, ExperimentPreset] = {
         num_workers=4,
         use_amp=True,
     ),
+    # small-img600-rot: sama persis dengan small-img600 tapi dengan augmentasi rotasi saja
+    # (tanpa horizontal flip). Horizontal flip dihapus karena menyebabkan inkonsistensi label
+    # pada kelas berarah (belok kiri/kanan, masuk jalur kiri, dll.). Seed = 42.
+    "small-img600-rot": ExperimentPreset(
+        preset_key="small-img600-rot",
+        run_name="yolos-small-image-600-rot",
+        output_name="yolos-small-image-600-rot",
+        image_size=600,
+        epochs=40,
+        batch_size=2,
+        learning_rate=0.00005,
+        weight_decay=0.0001,
+        score_threshold=0.3,
+        lr_step=0,
+        lr_gamma=0.5,
+        warmup_epochs=4,
+        cosine_decay=True,
+        grad_clip=0.1,
+        num_workers=4,
+        use_amp=True,
+    ),
     # small-img700: bs=2 di A100 (~46-50GB terukur), ~8.8 jam. Per-epoch ~793s,
     # hampir sama dengan img600 (~788s) — bottleneck bukan di attention tapi I/O.
     "small-img700": ExperimentPreset(
@@ -382,9 +403,20 @@ def run_experiment(
     dataset_dir: Path,
     output_dir: Path,
     model_name: str,
+    seed: int | None = None,
 ) -> dict[str, Any]:
     modules = import_training_modules()
     torch = modules["torch"]
+
+    if seed is not None:
+        import random as _random
+        import numpy as _np
+        _random.seed(seed)
+        _np.random.seed(seed)
+        torch.manual_seed(seed)
+        if torch.cuda.is_available():
+            torch.cuda.manual_seed_all(seed)
+        print(f"[INFO] Random seed ditetapkan: {seed}")
     DataLoader = modules["DataLoader"]
     YolosImageProcessor = modules["YolosImageProcessor"]
     CLASS_NAMES = modules["CLASS_NAMES"]
@@ -536,6 +568,53 @@ def main_for_preset(default_preset: str) -> None:
         dataset_dir=dataset_dir,
         output_dir=output_dir,
         model_name=args.model_name,
+    )
+    print("[DONE] Training dan evaluasi selesai.")
+    print(json.dumps(summary["metrics"], indent=2, ensure_ascii=True))
+    print(f"[DONE] Artifact tersimpan di: {output_dir}")
+
+
+def main_for_preset_with_seed(default_preset: str, seed: int = 42) -> None:
+    parser = build_parser(default_preset)
+    args = parser.parse_args()
+    preset = PRESETS[args.preset]
+
+    drive_mount_point = Path(args.drive_mount_point)
+    if not args.skip_mount:
+        ensure_google_drive_mounted(drive_mount_point)
+
+    if not args.skip_install:
+        install_requirements()
+
+    dataset_source = Path(args.dataset_source)
+    dataset_dir = prepare_dataset(dataset_source, force_copy=args.force_dataset_copy)
+
+    output_name = args.output_name or preset.output_name
+    output_dir = Path(args.drive_output_root) / output_name
+
+    print("[CONFIG] ================================================")
+    print(f"[CONFIG] Preset        : {preset.preset_key}")
+    print(f"[CONFIG] Model         : {args.model_name}")
+    print(f"[CONFIG] Image Size    : {preset.image_size} px")
+    print(f"[CONFIG] Batch Size    : {preset.batch_size}")
+    print(f"[CONFIG] Epochs        : {preset.epochs}")
+    print(f"[CONFIG] Learning Rate : {preset.learning_rate:.0e}")
+    print(f"[CONFIG] LR Warmup     : {preset.warmup_epochs} epoch")
+    print(f"[CONFIG] LR Scheduler  : {'Cosine Decay' if preset.cosine_decay else 'Step LR'}")
+    print(f"[CONFIG] Weight Decay  : {preset.weight_decay}")
+    print(f"[CONFIG] Grad Clipping : {preset.grad_clip}")
+    print(f"[CONFIG] Score Thresh  : {preset.score_threshold}")
+    print(f"[CONFIG] Mixed Prec.   : {'Ya (AMP)' if preset.use_amp else 'Tidak'}")
+    print(f"[CONFIG] Num Workers   : {preset.num_workers}")
+    print(f"[CONFIG] Random Seed   : {seed}")
+    print(f"[CONFIG] Output Dir    : {output_dir}")
+    print("[CONFIG] ================================================")
+    summary = run_experiment(
+        preset,
+        dataset_dir=dataset_dir,
+        output_dir=output_dir,
+        model_name=args.model_name,
+        seed=seed,
     )
     print("[DONE] Training dan evaluasi selesai.")
     print(json.dumps(summary["metrics"], indent=2, ensure_ascii=True))

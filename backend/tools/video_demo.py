@@ -7,7 +7,7 @@ def build_video_demo_html() -> str:
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Prediksi Real-Time</title>
+    <title>Deteksi dan Klasifikasi Real-Time</title>
     <style>
       :root {
         color-scheme: light;
@@ -220,7 +220,7 @@ def build_video_demo_html() -> str:
       <section class="layout">
         <aside class="card sidebar">
           <div class="field">
-            <label for="intervalSelect">Interval Prediksi</label>
+            <label for="intervalSelect">Interval Klasifikasi</label>
             <select id="intervalSelect">
               <option value="500">0.5 detik</option>
               <option value="1000" selected>1 detik</option>
@@ -358,23 +358,29 @@ def build_video_demo_html() -> str:
           const l = x1 * sx, t = y1 * sy, w = (x2 - x1) * sx, h = (y2 - y1) * sy;
           const color = colors[i % colors.length];
 
+          // Kotak — stroke berwarna agar tiap objek bisa dibedakan
           overlayCtx.strokeStyle = color;
           overlayCtx.lineWidth = 3;
           overlayCtx.strokeRect(l, t, w, h);
 
+          // Label — background gelap semi-transparan supaya teks putih selalu terbaca
           const label = d.class + " " + (d.confidence * 100).toFixed(1) + "%";
           overlayCtx.font = "bold 13px Segoe UI, sans-serif";
           const tw = overlayCtx.measureText(label).width;
           const ty = Math.max(18, t);
-          overlayCtx.fillStyle = color;
+          overlayCtx.fillStyle = "rgba(0,0,0,0.75)";
           overlayCtx.fillRect(l, ty - 17, tw + 10, 20);
+          // Strip warna tipis di sisi kiri label — penanda kelas tetap ada
+          overlayCtx.fillStyle = color;
+          overlayCtx.fillRect(l, ty - 17, 4, 20);
           overlayCtx.fillStyle = "#fff";
-          overlayCtx.fillText(label, l + 5, ty - 2);
+          overlayCtx.fillText(label, l + 9, ty - 2);
 
+          // List item — warna sebagai aksen border kiri, teks gelap di atas putih
           const li = document.createElement("li");
           li.innerHTML =
-            '<span class="class-badge" style="background:' + color + '">' + d.class + '</span>' +
-            '<span class="conf">' + (d.confidence * 100).toFixed(1) + '%</span>' +
+            '<span class="class-badge" style="border-left:4px solid ' + color + ';background:#f8fafc;color:#1e293b">' + d.class + '</span>' +
+            '<span class="conf" style="color:#1e293b">' + (d.confidence * 100).toFixed(1) + '%</span>' +
             '<span class="muted">box [' + d.box.map(v => v.toFixed(0)).join(", ") + ']</span>';
           detectionList.appendChild(li);
         });
@@ -466,7 +472,7 @@ def build_video_demo_html() -> str:
             });
             if (!res.ok) {
               const err = await res.json().catch(() => ({}));
-              throw new Error(err.detail || "Prediksi gagal");
+              throw new Error(err.detail || "Klasifikasi gagal");
             }
             const payload = await res.json();
             renderDetections(payload);

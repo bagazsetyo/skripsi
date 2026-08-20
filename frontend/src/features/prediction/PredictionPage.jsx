@@ -6,7 +6,7 @@ export function PredictionPage() {
   return (
     <div className="page-stack">
       <div>
-        <Typography.Title level={2}>Prediksi Real-Time</Typography.Title>
+        <Typography.Title level={2}>Deteksi dan Klasifikasi Real-Time</Typography.Title>
         <Typography.Paragraph type="secondary">
           Deteksi rambu lalu lintas secara real-time menggunakan kamera. Arahkan kamera ke
           rambu lalu lintas, sistem akan otomatis mendeteksi dan menampilkan hasilnya.
@@ -23,8 +23,8 @@ export function PredictionPage() {
         }}
       >
         <iframe
-          src={`${API_BASE}/video-demo`}
-          title="Video Prediksi Real-Time"
+          src={`${API_BASE}/video-demo?ngrok-skip-browser-warning=true`}
+          title="Video Deteksi dan Klasifikasi Real-Time"
           style={{
             width: "100%",
             height: "calc(100vh - 220px)",

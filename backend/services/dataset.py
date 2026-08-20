@@ -107,10 +107,12 @@ def _augment_image(image: Image.Image) -> Image.Image:
     return image
 
 
-def _rotate_and_flip(
+def _rotate_image(
     image: Image.Image, parts: List[List[float]]
 ) -> Tuple[Image.Image, List[List[float]]]:
     # 50% chance: random rotation (90°/180°/270°) — bbox ikut ditransformasi
+    # Horizontal flip dihapus karena menyebabkan inkonsistensi label pada kelas berarah
+    # (larangan-belok-kanan/kiri, perintah-masuk-jalur-kiri, dll.)
     if random.random() < 0.5:
         angle = random.choice([90, 180, 270])
         image = image.rotate(angle, expand=True)
@@ -124,11 +126,6 @@ def _rotate_and_flip(
             else:               # 270° CCW = 90° CW: (xc,yc) → (1-yc, xc), w↔h
                 new_parts.append([cid, 1 - yc, xc, bh, bw])
         parts = new_parts
-
-    # 30% chance: horizontal flip — bbox x di-mirror
-    if random.random() < 0.3:
-        image = image.transpose(Image.FLIP_LEFT_RIGHT)
-        parts = [[p[0], 1 - p[1], p[2], p[3], p[4]] for p in parts]
 
     return image, parts
 
@@ -161,7 +158,7 @@ class TrafficSignDataset:
 
         if self.augment:
             image = _augment_image(image)
-            image, raw_parts = _rotate_and_flip(image, raw_parts)
+            image, raw_parts = _rotate_image(image, raw_parts)
 
         width, height = image.size
 
